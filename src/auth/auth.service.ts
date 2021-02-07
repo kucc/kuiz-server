@@ -1,19 +1,27 @@
-import { Repository } from "typeorm";
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
+import { Injectable } from '@nestjs/common';
+import { GoogleUserInfo } from 'src/common/google-auth-interface';
+import { UserResponseDTO } from 'src/user/dto/user-response.dto';
+import { UserService } from '../user/user.service';
+
 import * as jwt from 'jsonwebtoken';
 
-import { UserEntity } from "../entity/user.entity";
 import SSOUserDTO from "./dto/sso-user.dto";
-import { UserResponseDTO } from '../user/dto/user-response.dto'
 
 @Injectable()
-export class AuthService{
+export class AuthService {
+  constructor(private readonly userService: UserService) {}
 
-  constructor(
-    @InjectRepository(UserEntity)
-    public readonly UserRepository: Repository<UserEntity>
-  ){}
+  async validateUser(userInfo: GoogleUserInfo): Promise<UserResponseDTO> {
+    const user = await this.userService.findByEmail(userInfo.email);
+
+    if (!user) {
+      const newUser = await this.userService.createUser(userInfo);
+      return newUser;
+    }
+
+    return user;
+  }
+
 
   public decryptCodeFromSSOServer(code: string): SSOUserDTO {
     const { data } = jwt.verify(code, process.env.SSO_JWT_SECRET) as { data: SSOUserDTO };
@@ -21,8 +29,7 @@ export class AuthService{
     return data;
   }
 
-  public createAccessToken(user: UserEntity): string{
-    const userResponseDTO = new UserResponseDTO(user);
+  public createAccessToken(userResponseDTO: UserResponseDTO): string{
 
     return jwt.sign(
       {data: userResponseDTO, timestamp: Date.now()},
