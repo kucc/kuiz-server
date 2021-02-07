@@ -1,8 +1,9 @@
 import { Column, Entity,  JoinColumn,  ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { CategoryEntity } from "./category";
+
 import { QuizEntity } from "./quiz.entity";
-import { UserSolveQuizBookEntity } from "./user-solve-quiz-book.entity";
 import { UserEntity } from "./user.entity";
+import { CategoryEntity } from "./category.entity";
+import { UserSolveQuizBookEntity } from "./user-solve-quiz-book.entity";
 
 @Entity('quizBook')
 export class QuizBookEntity {

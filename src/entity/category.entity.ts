@@ -1,4 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+
 import { QuizBookEntity } from "./quiz-book.entity";
 
 @Entity('category')

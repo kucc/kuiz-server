@@ -1,5 +1,5 @@
-import { join } from 'path';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
 import { QuizBookEntity } from './quiz-book.entity';
 import { UserSolveQuizBookEntity } from './user-solve-quiz-book.entity';
 
