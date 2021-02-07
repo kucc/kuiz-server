@@ -9,7 +9,7 @@
     "prebuild": "rimraf dist",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "build": "cross-env NODE_ENV=prod nest build",
-    "start": "cross-env NODE_ENV=local nest start",
+    "start": "cross-env NODE_ENV=dev nest start",
     "start:local": "cross-env NODE_ENV=local nest start --watch",
     "start:dev": "cross-env NODE_ENV=dev nest start --watch",
     "start:debug": "cross-env NODE_ENV=dev nest start --debug --watch",
