@@ -75,6 +75,13 @@ export class AuthController {
         throw new UnauthorizedException('인증 되지 않은 사용자입니다.', error);
       });
 
-    return userResponse.data;
+    const userInfo: GoogleUserInfo = {
+      email: userResponse.data.email,
+      name: userResponse.data.name,
+    };
+
+    const user = await this.authService.validateUser(userInfo); //new or exist
+
+    return user;
   }
 }
