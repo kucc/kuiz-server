@@ -18,13 +18,13 @@ export class UserSolveQuizBookEntity{
 
   @ManyToOne(type=> QuizEntity, savedQuiz => savedQuiz.saves)
   @JoinColumn({name:'savedQuizId', referencedColumnName: 'id'})
-  public savedQuiz: QuizEntity;
+  savedQuiz: QuizEntity;
   
   @ManyToOne(type=> UserEntity, user => user.solves)
   @JoinColumn({name:'userId', referencedColumnName: 'id'})
-  public user: UserEntity;
+  user: UserEntity;
 
   @ManyToOne(type=> QuizBookEntity, quizBook => quizBook.solves)
   @JoinColumn({name: 'quizBookId', referencedColumnName: 'id'})
-  public quizBook: QuizBookEntity;
+  quizBook: QuizBookEntity;
 }
