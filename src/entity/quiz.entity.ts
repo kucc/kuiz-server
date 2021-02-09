@@ -37,9 +37,9 @@ export class QuizEntity {
 
   @ManyToOne(type=> QuizBookEntity, quizBook => quizBook.quizs)
   @JoinColumn({name: 'quizBookId', referencedColumnName: 'id'})
-  public quizBook: QuizBookEntity;
+  quizBook: QuizBookEntity;
 
   @OneToMany(type=>UserSolveQuizBookEntity, save=>save.savedQuiz)
-  public saves: UserSolveQuizBookEntity[];
+  saves: UserSolveQuizBookEntity[];
 
 }
