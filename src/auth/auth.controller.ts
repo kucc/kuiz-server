@@ -27,6 +27,7 @@ import { stringify } from 'querystring';
 import { UserService } from '../user/user.service';
 import { LoginQueryDTO } from './dto/login-query.dto';
 import { KUCCRequestDTO } from '../user/dto/kucc-request.dto';
+import setAccessTokenCookie from 'src/lib/set-access-token-cookie';
 
 @Controller('auth')
 export class AuthController {
@@ -36,7 +37,7 @@ export class AuthController {
     private readonly userService: UserService,
   ) {}
 
-  @Get('')
+  @Get('google')
   async login(@Res() response: Response) {
     const authConfig: GoogleAuthQuery = {
       client_id: process.env.GOOGLE_CLIENT_ID,
@@ -52,7 +53,10 @@ export class AuthController {
   }
 
   @Get('redirect')
-  async googleAuthRedirect(@Req() request: IRequest) {
+  async googleAuthRedirect(
+    @Req() request: IRequest,
+    @Res() response: Response,
+  ) {
     // token 요청
     const tokenConfig: GoogleTokenQuery = {
       code: request.query.code,
@@ -86,8 +90,9 @@ export class AuthController {
     };
 
     const user = await this.authService.validateUser(userInfo); //new or exist
-
-    return user;
+    const kuizAccessToken = this.authService.createAccessToken(user);
+    setAccessTokenCookie(response, kuizAccessToken);
+    response.redirect(process.env.CLIENT_URL, 301);
   }
 
   @Get('kucc')
@@ -117,13 +122,7 @@ export class AuthController {
 
     //로그인
     const accessToken = this.authService.createAccessToken(userExist);
-    response.cookie('accessToken', accessToken);
-    response.setHeader('Access-Control-Allow-Credentials', 'true');
-    response.setHeader('Cache-Control', [
-      'no-cache',
-      'no-store',
-      'must-revalidate',
-    ]);
+    setAccessTokenCookie(response, accessToken);
     response.redirect(process.env.CLIENT_URL, 301);
   }
 }
