@@ -26,7 +26,6 @@ import {
 import { stringify } from 'querystring';
 import { UserService } from '../user/user.service';
 import { LoginQueryDTO } from './dto/login-query.dto';
-import CreateUserRequestDTO from '../user/dto/create-user-request.dto';
 import { KUCCRequestDTO } from '../user/dto/kucc-request.dto';
 
 @Controller('auth')
@@ -34,7 +33,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly httpService: HttpService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
   ) {}
 
   @Get('')
@@ -90,24 +89,27 @@ export class AuthController {
 
     return user;
   }
-  
+
   @Get('kucc')
-  async loginByKUCC(@Res() res: Response){
-    const url = `http://${process.env.REQUEST_URL}/login?`;
-    const query = 'redirect=http://localhost:3308';
-  
-    const KUCCOauthURL = url + query;
-    res.redirect(KUCCOauthURL);
+  async loginByKUCC(@Res() res: Response) {
+    const ssoURL = process.env.SSO_URL;
+    const redirectURL = process.env.KUCC_REDIRECT_URL;
+
+    const requestURL = ssoURL + '?redirect=' + redirectURL;
+    res.redirect(requestURL);
   }
 
   @Get('login')
-  async callbackBySSO(@Query() query:LoginQueryDTO, @Res() response: Response){
+  async callbackBySSO(
+    @Query() query: LoginQueryDTO,
+    @Res() response: Response,
+  ) {
     const code = query.code;
     const userData = this.authService.decryptCodeFromSSOServer(code);
 
     let userExist = await this.userService.findByEmail(userData.email);
 
-    if(!userExist){
+    if (!userExist) {
       //회원가입
       const createUserRequestDTO = new KUCCRequestDTO(userData);
       userExist = await this.userService.createUser(createUserRequestDTO);
@@ -117,8 +119,11 @@ export class AuthController {
     const accessToken = this.authService.createAccessToken(userExist);
     response.cookie('accessToken', accessToken);
     response.setHeader('Access-Control-Allow-Credentials', 'true');
-    response.setHeader('Cache-Control', ['no-cache', 'no-store', 'must-revalidate']);
-    response.redirect(`http://${process.env.REDIRECT_URL}`, 301);
-
+    response.setHeader('Cache-Control', [
+      'no-cache',
+      'no-store',
+      'must-revalidate',
+    ]);
+    response.redirect(process.env.CLIENT_URL, 301);
   }
 }
