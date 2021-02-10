@@ -52,13 +52,11 @@ export class UserService {
 
   async createUserByKUCC(user: KUCCRequestDTO): Promise<UserResponseDTO> {
     const newUser = this.UserRepository.create(user);
-    
+
     await this.UserRepository.save(newUser).catch(() => {
       throw new BadRequestException('잘못된 요청입니다.');
     });
 
     return new UserResponseDTO(newUser);
   }
-
- 
 }
