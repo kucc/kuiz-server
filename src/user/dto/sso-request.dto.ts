@@ -1,7 +1,7 @@
 import { IsEmail, IsString } from "class-validator";
 import SSOUserDTO from "../../auth/dto/sso-user.dto";
 
-export class KUCCRequestDTO{
+export class SSORequestDTO{
   constructor(sso: SSOUserDTO){
     this.email = sso.email;
     this.name = sso.name;
