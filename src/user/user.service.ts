@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entity/user.entity';
 import CreateUserRequestDTO from './dto/create-user-request.dto';
 import { UserResponseDTO } from './dto/user-response.dto';
-import { KUCCRequestDTO } from './dto/kucc-request.dto';
+import { SSORequestDTO } from './dto/sso-request.dto';
 
 @Injectable()
 export class UserService {
@@ -50,7 +50,7 @@ export class UserService {
     return new UserResponseDTO(newUser);
   }
 
-  async createUserByKUCC(user: KUCCRequestDTO): Promise<UserResponseDTO> {
+  async createUserBySSO(user: SSORequestDTO): Promise<UserResponseDTO> {
     const newUser = this.UserRepository.create(user);
 
     await this.UserRepository.save(newUser).catch(() => {
@@ -59,4 +59,10 @@ export class UserService {
 
     return new UserResponseDTO(newUser);
   }
+
+  async joinUserWithSSO(user: UserResponseDTO){
+    await this.UserRepository.update(user, {isMember: true});
+  }
+
+ 
 }
