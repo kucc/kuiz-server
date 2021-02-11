@@ -34,4 +34,11 @@ export class QuizController {
     const updatedQuiz = await this.quizService.updateQuiz(quiz, requestDTO);
     return updatedQuiz;
   }
+
+  @Delete(':quizId')
+  async deleteQuiz(
+    @Param('quizId') quizId: number,
+  ): Promise<{ result: boolean }> {
+    return await this.quizService.deleteQuiz(quizId);
+  }
 }

@@ -32,4 +32,14 @@ export class QuizService {
 
     return new QuizResponseDTO(updatedQuiz);
   }
+
+  async deleteQuiz(quizId: number): Promise<{ result: boolean }> {
+    const quiz = await this.findById(quizId);
+
+    await this.QuizRepository.delete(quiz).catch(() => {
+      throw new BadRequestException('잘못된 요청입니다.');
+    });
+
+    return { result: true };
+  }
 }
