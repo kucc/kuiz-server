@@ -6,7 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { DeserializeUserMiddleware } from './middleware/deserialize-user';
+import { QuizBookModule } from './quiz-book/quiz-book.module';
 
 @Module({
   imports: [
@@ -18,6 +18,7 @@ import { DeserializeUserMiddleware } from './middleware/deserialize-user';
     TypeOrmModule.forRoot(),
     UserModule,
     AuthModule,
+    QuizBookModule
   ],
   controllers: [AppController],
   providers: [AppService],
