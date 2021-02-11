@@ -22,7 +22,7 @@ export class QuizBookEntity {
   @Column({type:'int', default: 0})
   solvedCount: number;
 
-  //수정
+  //수정 CreatedColumn
   @Column({type: 'timestamp', default: ()=> 'CURRENT_TIMESTAMP'})
   createdAt: Date;
 
@@ -32,12 +32,18 @@ export class QuizBookEntity {
   @Column({type: 'tinyint', default: false})
   completed: boolean;
 
-  @ManyToOne(type=> CategoryEntity, category => category.quizBooks)
+  @Column({type:'int', nullable: false})
+  categoryId: number;
+
+  @Column({type: 'int', nullable: false})
+  ownerId: number;
+
+  @ManyToOne(type=> CategoryEntity, category => category.quizBooks, {nullable: false})
   @JoinColumn({name: 'categoryId',referencedColumnName: 'id'})
   category: CategoryEntity;
 
-  @ManyToOne(type => UserEntity, user => user.quizBooks)
-  @JoinColumn({name: 'ownerId',referencedColumnName: 'id'})
+  @ManyToOne(type => UserEntity, user => user.quizBooks, {nullable: false})
+  @JoinColumn({name: 'ownerId', referencedColumnName: 'id'})
   owner: UserEntity;
 
   @OneToMany(type=>QuizEntity, quiz => quiz.quizBook)
