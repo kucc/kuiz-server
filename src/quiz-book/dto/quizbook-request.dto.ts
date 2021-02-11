@@ -1,4 +1,4 @@
-import { IsNotEmpty } from "class-validator";
+import { IsEmpty, IsNotEmpty } from "class-validator";
 
 export class CreateQuizBookDTO{
 
@@ -8,9 +8,11 @@ export class CreateQuizBookDTO{
   @IsNotEmpty()
   readonly categoryId: number;
 
-  userName: string;
+  @IsEmpty()
+  ownerName: string;
 
-  userId: number;
+  @IsEmpty()
+  ownerId: number;
 }
 
 export class EditQuizBookDTO{
@@ -18,6 +20,7 @@ export class EditQuizBookDTO{
   @IsNotEmpty()
   readonly title: string;
 
+  @IsNotEmpty()
   readonly categoryId: number;
   
 }

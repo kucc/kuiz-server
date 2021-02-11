@@ -24,8 +24,8 @@ export class QuizBookService {
     userName: string, 
     quizbookDTO: CreateQuizBookDTO)
   : Promise<QuizBookEntity>{
-    quizbookDTO.userId = userId;
-    quizbookDTO.userName = userName;
+    quizbookDTO.ownerId = userId;
+    quizbookDTO.ownerName = userName;
     const quizBook = this.quizBookRepository.create(quizbookDTO);
     await this.quizBookRepository.save(quizBook);
     return quizBook;
