@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { QuizBookModule } from './quiz-book/quiz-book.module';
+import { DeserializeUserMiddleware } from './common/middleware/deserialize-user';
 
 @Module({
   imports: [

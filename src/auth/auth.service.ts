@@ -1,10 +1,11 @@
+import * as jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
+
+import SSOUserDTO from './dto/sso-user.dto';
+import { UserService } from '../user/user.service';
+import { SSORequestDTO } from '../user/dto/sso-request.dto';
 import { GoogleUserInfo } from 'src/common/google-auth-interface';
 import { UserResponseDTO } from 'src/user/dto/user-response.dto';
-import { UserService } from '../user/user.service';
-import * as jwt from 'jsonwebtoken';
-import SSOUserDTO from './dto/sso-user.dto';
-import { SSORequestDTO } from '../user/dto/sso-request.dto';
 
 @Injectable()
 export class AuthService {

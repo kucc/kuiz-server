@@ -24,10 +24,9 @@ import {
   IRequest,
 } from 'src/common/google-auth-interface';
 import { stringify } from 'querystring';
-import { UserService } from '../user/user.service';
 import { LoginQueryDTO } from './dto/login-query.dto';
 import { SSORequestDTO } from '../user/dto/sso-request.dto';
-import setAccessTokenCookie from 'src/lib/set-access-token-cookie';
+import setAccessTokenCookie from 'src/common/lib/set-access-token-cookie';
 
 @Controller('auth')
 export class AuthController {
