@@ -18,6 +18,7 @@ export class QuizController {
   ) {}
 
   @Patch(':quizId')
+  @UseGuards(UserGuard)
   async updateQuiz(
     @Req() request,
     @Param('quizId') quizId: number,
@@ -36,6 +37,7 @@ export class QuizController {
   }
 
   @Delete(':quizId')
+  @UseGuards(UserGuard)
   async deleteQuiz(
     @Param('quizId') quizId: number,
   ): Promise<{ result: boolean }> {
