@@ -44,9 +44,13 @@ export class QuizBookController {
   }
 
   @Patch(':id/like')
-  @UseGuards(new MemberGuard())
-  async updateQuizBookLikes(@Param('id') id: number){
+  @UseGuards(new UserGuard())
+  async updateQuizBookLikes(@Req() request:Request, @Param('id') id: number)
+  : Promise<LikeQuizBookResponseDTO>{
+    const userId = request.user.id;
+    const likeResult = await this.quizBookService.updateQuizBookLikes(id, userId);
 
+    return new LikeQuizBookResponseDTO(likeResult);
   }
 
   @Post(':id/solve')

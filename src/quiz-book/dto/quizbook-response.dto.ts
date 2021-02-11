@@ -27,3 +27,12 @@ export class EditQuizBookResponseDTO{
   readonly title: string;
   readonly categoryId: number;
 }
+
+export class LikeQuizBookResponseDTO{
+  constructor(quizBook: QuizBookEntity){
+    this.id = quizBook.id;
+    this.likedCount = quizBook.likedCount;
+  }
+  readonly id: number;
+  readonly likedCount: number;
+}
