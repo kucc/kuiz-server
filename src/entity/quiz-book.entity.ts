@@ -27,7 +27,7 @@ export class QuizBookEntity {
   createdAt: Date;
 
   @Column({type: 'int', default:0})
-  likeCount: number;
+  likedCount: number;
 
   @Column({type: 'tinyint', default: false})
   completed: boolean;

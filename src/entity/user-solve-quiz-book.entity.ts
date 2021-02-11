@@ -16,15 +16,25 @@ export class UserSolveQuizBookEntity{
   @Column({type:'tinyint', default: false})
   liked: boolean;
 
-  @ManyToOne(type=> QuizEntity, savedQuiz => savedQuiz.saves)
+  @Column({type:'int', nullable:false})
+  savedQuizId: number;
+
+  @Column({type:'int', nullable:false})
+  userId: number;
+
+  @Column({type:'int', nullable:false})
+  quizBookId: number;
+
+
+  @ManyToOne(type=> QuizEntity, savedQuiz => savedQuiz.saves, {nullable:false})
   @JoinColumn({name:'savedQuizId', referencedColumnName: 'id'})
   savedQuiz: QuizEntity;
   
-  @ManyToOne(type=> UserEntity, user => user.solves)
+  @ManyToOne(type=> UserEntity, user => user.solves, {nullable:false})
   @JoinColumn({name:'userId', referencedColumnName: 'id'})
   user: UserEntity;
 
-  @ManyToOne(type=> QuizBookEntity, quizBook => quizBook.solves)
+  @ManyToOne(type=> QuizBookEntity, quizBook => quizBook.solves , {nullable:false})
   @JoinColumn({name: 'quizBookId', referencedColumnName: 'id'})
   quizBook: QuizBookEntity;
 }
