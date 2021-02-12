@@ -5,7 +5,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-
 import { QuizBookEntity } from '../entity/quiz-book.entity';
 import { CreateQuizBookDTO, EditQuizBookDTO } from './dto/quizbook-request.dto';
 import { UserSolveQuizBookService } from '../user-solve-quiz-book/user-solve-quiz-book.service';
@@ -15,15 +14,16 @@ export class QuizBookService {
   constructor(
     @InjectRepository(QuizBookEntity)
     private readonly quizBookRepository: Repository<QuizBookEntity>,
-
     private readonly userSolveQuizBookService: UserSolveQuizBookService,
   ) {}
 
   async findQuizBookbyId(id: number): Promise<QuizBookEntity> {
     const quizBook = await this.quizBookRepository.findOne({ id });
+
     if (!quizBook) {
       throw new NotFoundException('존재하지 않는 문제집입니다.');
     }
+
     return quizBook;
   }
 
@@ -34,6 +34,7 @@ export class QuizBookService {
     if (quizBookId !== userId) {
       throw new UnauthorizedException('권한이 없습니다.');
     }
+
     return true;
   }
 
@@ -44,16 +45,22 @@ export class QuizBookService {
   ): Promise<QuizBookEntity> {
     quizbookDTO.ownerId = userId;
     quizbookDTO.ownerName = userName;
+
     const quizBook = this.quizBookRepository.create(quizbookDTO);
     await this.quizBookRepository.save(quizBook);
+
     return quizBook;
   }
 
-  async deleteQuizBook(quizBookId: number, userId: number) {
+  async deleteQuizBook(
+    quizBookId: number,
+    userId: number,
+  ): Promise<{ result: boolean }> {
     await this.findQuizBookbyId(quizBookId);
     await this.checkAuthorization(quizBookId, userId);
 
     await this.quizBookRepository.delete({ id: quizBookId });
+
     return { result: true };
   }
 
@@ -68,6 +75,7 @@ export class QuizBookService {
 
     const editedQuizBook = this.quizBookRepository.merge(quizBook, quizbookDTO);
     await this.quizBookRepository.save(editedQuizBook);
+
     return editedQuizBook;
   }
 
@@ -81,6 +89,7 @@ export class QuizBookService {
       quizBookId,
       userId,
     );
+
     if (like) {
       await this.quizBookRepository.increment(quizBook, 'likedCount', 1);
     } else {
@@ -91,6 +100,6 @@ export class QuizBookService {
   }
 
   async solveQuiz(quizId: number, userId: number) {
-    //
+    // TODO
   }
 }

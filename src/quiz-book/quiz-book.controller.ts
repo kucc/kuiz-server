@@ -36,6 +36,7 @@ export class QuizBookController {
       user.name,
       quizBookDTO,
     );
+
     return new QuizBookResponseDTO(newQuizBook);
   }
 
@@ -44,8 +45,9 @@ export class QuizBookController {
   async deleteQuizBook(
     @Req() request: Request,
     @Param('id') quizBookId: number,
-  ) {
+  ): Promise<{ result: boolean }> {
     const userId = request.user.id;
+
     return await this.quizBookService.deleteQuizBook(quizBookId, userId);
   }
 
@@ -62,6 +64,7 @@ export class QuizBookController {
       quizBookDTO,
       userId,
     );
+
     return new EditQuizBookResponseDTO(editedQuizBook);
   }
 
@@ -72,6 +75,7 @@ export class QuizBookController {
     @Param('id') id: number,
   ): Promise<LikeQuizBookResponseDTO> {
     const userId = request.user.id;
+
     const likeResult = await this.quizBookService.updateQuizBookLikes(
       id,
       userId,
@@ -80,6 +84,7 @@ export class QuizBookController {
     return new LikeQuizBookResponseDTO(likeResult);
   }
 
+  // TODO
   @Post(':id/solve')
   async solveQuiz(@Param('id') id: number) {
     const userId = request.user.id;

@@ -28,6 +28,7 @@ export class UserSolveQuizBookService {
       userId,
     });
     await this.userSolveQuizBookRepository.save(newUSQB);
+
     return newUSQB;
   }
 
@@ -41,11 +42,7 @@ export class UserSolveQuizBookService {
       solvedQuizBook = await this.createUserSolveQuizBook(quizBookId, userId);
     }
 
-    if (solvedQuizBook.liked) {
-      solvedQuizBook.liked = false;
-    } else {
-      solvedQuizBook.liked = true;
-    }
+    solvedQuizBook.liked = !solvedQuizBook.liked;
     await this.userSolveQuizBookRepository.save(solvedQuizBook);
 
     return solvedQuizBook.liked;
