@@ -24,17 +24,15 @@ import {
   IRequest,
 } from 'src/common/google-auth-interface';
 import { stringify } from 'querystring';
-import { UserService } from '../user/user.service';
 import { LoginQueryDTO } from './dto/login-query.dto';
-import { KUCCRequestDTO } from '../user/dto/kucc-request.dto';
-import setAccessTokenCookie from 'src/lib/set-access-token-cookie';
+import { SSORequestDTO } from '../user/dto/sso-request.dto';
+import setAccessTokenCookie from 'src/common/lib/set-access-token-cookie';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly httpService: HttpService,
-    private readonly userService: UserService,
   ) {}
 
   @Get('google')
@@ -112,16 +110,12 @@ export class AuthController {
     const code = query.code;
     const userData = this.authService.decryptCodeFromSSOServer(code);
 
-    let userExist = await this.userService.findByEmail(userData.email);
+    const ssoRequestDTO = new SSORequestDTO(userData);
 
-    if (!userExist) {
-      //회원가입
-      const createUserRequestDTO = new KUCCRequestDTO(userData);
-      userExist = await this.userService.createUser(createUserRequestDTO);
-    }
+    const linkedUser = await this.authService.linkWithSSO(ssoRequestDTO);
 
     //로그인
-    const accessToken = this.authService.createAccessToken(userExist);
+    const accessToken = this.authService.createAccessToken(linkedUser);
     setAccessTokenCookie(response, accessToken);
     response.redirect(process.env.CLIENT_URL, 301);
   }

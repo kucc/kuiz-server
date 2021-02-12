@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -6,7 +6,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { DeserializeUserMiddleware } from './middleware/deserialize-user';
+import { QuizBookModule } from './quiz-book/quiz-book.module';
+import { DeserializeUserMiddleware } from './common/middleware/deserialize-user';
+import { UserSolveQuizBookModule } from './user-solve-quiz-book/user-solve-quiz-book.module';
 
 @Module({
   imports: [
@@ -18,11 +20,13 @@ import { DeserializeUserMiddleware } from './middleware/deserialize-user';
     TypeOrmModule.forRoot(),
     UserModule,
     AuthModule,
+    QuizBookModule,
+    UserSolveQuizBookModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
+export class AppModule implements NestModule {
   public configure(consumer: MiddlewareConsumer) {
     consumer.apply(DeserializeUserMiddleware).forRoutes('*');
   }
