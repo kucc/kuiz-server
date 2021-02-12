@@ -27,19 +27,19 @@ export class UserSolveQuizBookService {
   }
 
   async toggleQuizBookLikes(quizBookId: number, userId: number): Promise<boolean>{
-    let solve = await this.findbyQBIdandUserId(quizBookId, userId);
+    let solvedQuizBook = await this.findbyQBIdandUserId(quizBookId, userId);
 
-    if(!solve){
-      solve = await this.createUserSolveQuizBook(quizBookId, userId);
+    if(!solvedQuizBook){
+      solvedQuizBook = await this.createUserSolveQuizBook(quizBookId, userId);
     }
 
-    if(solve.liked){
-      solve.liked = false;
+    if(solvedQuizBook.liked){
+      solvedQuizBook.liked = false;
     }else {
-      solve.liked = true;
+      solvedQuizBook.liked = true;
     }
-    await this.userSolveQuizBookRepository.save(solve);
+    await this.userSolveQuizBookRepository.save(solvedQuizBook);
 
-    return solve.liked;
+    return solvedQuizBook.liked;
   }
 }
