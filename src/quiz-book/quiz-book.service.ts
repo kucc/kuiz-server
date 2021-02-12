@@ -1,11 +1,10 @@
-import { NotFoundException } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { QuizBookEntity } from '../entity/quiz-book.entity';
-import { UserSolveQuizBookService } from '../user-solve-quiz-book/user-solve-quiz-book.service';
 import { CreateQuizBookDTO, EditQuizBookDTO } from './dto/quizbook-request.dto';
+import { UserSolveQuizBookService } from '../user-solve-quiz-book/user-solve-quiz-book.service';
 
 @Injectable()
 export class QuizBookService {
@@ -25,6 +24,13 @@ export class QuizBookService {
     return quizBook;
   }
 
+  async checkAuthorization(quizBookId: number, userId: number): Promise<boolean>{
+    if(quizBookId !== userId){
+      throw new UnauthorizedException('권한이 없습니다.');
+    }
+    return true;
+  }
+
   async createQuizBook(
     userId: number, 
     userName: string, 
@@ -37,18 +43,18 @@ export class QuizBookService {
     return quizBook;
   }
 
-  async deleteQuizBook(id: number){
+  async deleteQuizBook(quizBookId: number, userId: number){
     await this.findQuizBookbyId(quizBookId);
     await this.checkAuthorization(quizBookId, userId);
 
     await this.quizBookRepository.delete({id: quizBookId});
-    await this.quizBookRepository.delete({id});
     return {result: true};
   }
 
   async editQuizBook(
-    id: number, 
-    quizbookDTO: EditQuizBookDTO)
+    quizBookId: number, 
+    quizbookDTO: EditQuizBookDTO,
+    userId: number)
     : Promise<QuizBookEntity>{
     const quizBook = await this.findQuizBookbyId(quizBookId);
 

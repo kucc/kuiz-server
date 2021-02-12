@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { request, Request } from 'express';
 
-import { MemberGuard } from '../common/guards/member.guard';
+import { QuizBookService } from './quiz-book.service';
 import { UserGuard } from '../common/guards/user.guard';
+import { MemberGuard } from '../common/guards/member.guard';
 import { CreateQuizBookDTO, EditQuizBookDTO } from './dto/quizbook-request.dto';
 import { QuizBookResponseDTO, EditQuizBookResponseDTO, LikeQuizBookResponseDTO } from './dto/quizbook-response.dto';
-import { QuizBookService } from './quiz-book.service';
 
 @Controller('quiz-book')
 export class QuizBookController {
@@ -27,21 +27,21 @@ export class QuizBookController {
 
   @Delete(':id')
   @UseGuards(new MemberGuard())
-  async deleteQuizBook(@Param('id') id: number){
-   
-    return await this.quizBookService.deleteQuizBook(id);
+  async deleteQuizBook(@Req() request: Request, @Param('id') quizBookId: number){
+    const userId = request.user.id;
+    return await this.quizBookService.deleteQuizBook(quizBookId, userId);
   }
 
   @Patch(':id')
   @UseGuards(new MemberGuard())
   async editQuizBookInfo(
     @Req() request: Request, 
-    @Param('id') id: number, 
+    @Param('id') quizBookId: number, 
     @Body() quizBookDTO: EditQuizBookDTO)
     : Promise<EditQuizBookResponseDTO>{
-
-    const editedQuizBook = await this.quizBookService.editQuizBook(id, quizBookDTO);
-    return new EditQuizBookResponseDTO(editedQuizBook);
+      const userId = request.user.id;
+      const editedQuizBook = await this.quizBookService.editQuizBook(quizBookId, quizBookDTO, userId);
+      return new EditQuizBookResponseDTO(editedQuizBook);
   }
 
   @Patch(':id/like')
