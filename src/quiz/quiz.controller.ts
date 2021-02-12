@@ -10,6 +10,7 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
+import { MemberGuard } from 'src/common/guards/member.guard';
 import { UserGuard } from 'src/common/guards/user.guard';
 import { QuizBookService } from 'src/quiz-book/quiz-book.service';
 import UpdateQuizRequestDTO from './dto/update-quiz-request.dto';
@@ -25,7 +26,7 @@ export class QuizController {
   ) {}
 
   @Patch(':quizId')
-  @UseGuards(UserGuard)
+  @UseGuards(MemberGuard)
   async updateQuiz(
     @Req() request,
     @Param('quizId') quizId: number,
@@ -46,7 +47,7 @@ export class QuizController {
   }
 
   @Delete(':quizId')
-  @UseGuards(UserGuard)
+  @UseGuards(MemberGuard)
   async deleteQuiz(
     @Param('quizId') quizId: number,
   ): Promise<{ result: boolean }> {
