@@ -84,19 +84,18 @@ export class QuizBookService {
     userId: number,
   ): Promise<QuizBookEntity> {
     const quizBook = await this.findQuizBookbyId(quizBookId);
-
-    const like = await this.userSolveQuizBookService.toggleQuizBookLikes(
+    const isUserLiked = await this.userSolveQuizBookService.toggleQuizBookLikes(
       quizBookId,
       userId,
     );
 
-    if (like) {
-      await this.quizBookRepository.increment(quizBook, 'likedCount', 1);
+    if (isUserLiked) {
+      quizBook.likedCount += 1;
     } else {
-      await this.quizBookRepository.increment(quizBook, 'likedCount', -1);
+      quizBook.likedCount -= 1;
     }
 
-    return quizBook;
+    return await this.quizBookRepository.save(quizBook);
   }
 
   async solveQuiz(quizId: number, userId: number) {

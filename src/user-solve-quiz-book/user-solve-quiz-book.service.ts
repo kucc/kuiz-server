@@ -39,7 +39,7 @@ export class UserSolveQuizBookService {
     let solvedQuizBook = await this.findbyQBIdandUserId(quizBookId, userId);
 
     if (!solvedQuizBook) {
-      solvedQuizBook = await this.createUserSolveQuizBook(quizBookId, userId);
+      solvedQuizBook = await this.createUserSolveQuizBook(quizBookId, userId); // solve APId에서 create되면 지워도됨
     }
 
     solvedQuizBook.liked = !solvedQuizBook.liked;

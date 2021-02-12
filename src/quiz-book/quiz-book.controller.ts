@@ -118,13 +118,12 @@ export class QuizBookController {
     @Param('id') id: number,
   ): Promise<LikeQuizBookResponseDTO> {
     const userId = request.user.id;
-
-    const likeResult = await this.quizBookService.updateQuizBookLikes(
+    const likedQuizBook = await this.quizBookService.updateQuizBookLikes(
       id,
       userId,
     );
 
-    return new LikeQuizBookResponseDTO(likeResult);
+    return new LikeQuizBookResponseDTO(likedQuizBook);
   }
 
   // TODO
