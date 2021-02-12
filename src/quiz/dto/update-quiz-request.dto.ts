@@ -1,14 +1,6 @@
-import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export default class UpdateQuizRequestDTO {
-  @IsNotEmpty()
-  @IsNumber()
-  public readonly id: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  public readonly quizBookId: number;
-
   @IsString()
   public readonly question: string;
 
