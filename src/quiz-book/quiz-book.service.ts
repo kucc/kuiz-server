@@ -18,7 +18,11 @@ export class QuizBookService {
   ){}
 
   async findQuizBookbyId(id: number): Promise<QuizBookEntity>{
-    return await this.quizBookRepository.findOne({id});
+    const quizBook = await this.quizBookRepository.findOne({id});
+    if(!quizBook){
+      throw new NotFoundException('존재하지 않는 문제집입니다.');
+    }
+    return quizBook;
   }
 
   async createQuizBook(
@@ -34,10 +38,10 @@ export class QuizBookService {
   }
 
   async deleteQuizBook(id: number){
-    const quizBook = await this.quizBookRepository.findOne(id);
-    if(!quizBook){
-     throw new NotFoundException(`존재하지 않는 문제집입니다.`);
-    }
+    await this.findQuizBookbyId(quizBookId);
+    await this.checkAuthorization(quizBookId, userId);
+
+    await this.quizBookRepository.delete({id: quizBookId});
     await this.quizBookRepository.delete({id});
     return {result: true};
   }
@@ -46,10 +50,9 @@ export class QuizBookService {
     id: number, 
     quizbookDTO: EditQuizBookDTO)
     : Promise<QuizBookEntity>{
-    const quizBook = await this.quizBookRepository.findOne(id);
-    if(!quizBook){
-      throw new NotFoundException(`존재하지 않는 문제집입니다.`);
-    }
+    const quizBook = await this.findQuizBookbyId(quizBookId);
+
+    await this.checkAuthorization(quizBookId, userId);
 
     const editedQuizBook = this.quizBookRepository.merge(quizBook, quizbookDTO);
     await this.quizBookRepository.save(editedQuizBook);
@@ -58,10 +61,7 @@ export class QuizBookService {
 
   async updateQuizBookLikes(quizBookId: number, userId: number)
   : Promise<QuizBookEntity>{
-    const quizBook = await this.quizBookRepository.findOne(quizBookId);
-    if(!quizBook){
-      throw new NotFoundException(`존재하지 않는 문제집입니다.`);
-    }
+    const quizBook = await this.findQuizBookbyId(quizBookId);
 
     const like = await this.userSolveQuizBookService.toggleQuizBookLikes(quizBookId, userId);
     if(like){
