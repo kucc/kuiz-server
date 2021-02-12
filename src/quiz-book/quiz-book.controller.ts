@@ -2,11 +2,16 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Patch,
   Post,
   Req,
+  Query,
   UseGuards,
+  forwardRef,
+  Inject,
+  BadRequestException,
 } from '@nestjs/common';
 import { request, Request } from 'express';
 
@@ -19,10 +24,33 @@ import {
   EditQuizBookResponseDTO,
   LikeQuizBookResponseDTO,
 } from './dto/quizbook-response.dto';
+import { QuizService } from 'src/quiz/quiz.service';
+import { QuizResponseDTO } from 'src/quiz/dto/quiz-response.dto';
 
 @Controller('quiz-book')
 export class QuizBookController {
-  constructor(private readonly quizBookService: QuizBookService) {}
+  constructor(
+    private readonly quizBookService: QuizBookService,
+
+    @Inject(forwardRef(() => QuizService))
+    private readonly quizService: QuizService,
+  ) {}
+
+  @Get(':id')
+  async getQuizOfOrder(
+    @Query() query: { order: number },
+    @Param('id') id: number,
+  ): Promise<QuizResponseDTO> {
+    const quizzes = await this.quizService.findByQuizBookId(id);
+
+    if (quizzes.length < query.order) {
+      throw new BadRequestException('해당 번호의 문제가 없습니다.'); // check out of range
+    }
+
+    const quizOfOrder = quizzes[query.order - 1]; // or add 'order' column (논의)
+
+    return new QuizResponseDTO(quizOfOrder);
+  }
 
   @Post()
   @UseGuards(new MemberGuard())
