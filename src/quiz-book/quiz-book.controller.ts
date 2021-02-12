@@ -26,6 +26,7 @@ import {
 } from './dto/quizbook-response.dto';
 import { QuizService } from 'src/quiz/quiz.service';
 import { QuizResponseDTO } from 'src/quiz/dto/quiz-response.dto';
+import CreateQuizRequestDTO from 'src/quiz/dto/create-quiz-request.dto';
 
 @Controller('quiz-book')
 export class QuizBookController {
@@ -66,6 +67,20 @@ export class QuizBookController {
     );
 
     return new QuizBookResponseDTO(newQuizBook);
+  }
+
+  @Post(':id/quiz')
+  @UseGuards(new MemberGuard())
+  async createQuiz(
+    @Param('id') id: number,
+    @Body() newQuizDTO: CreateQuizRequestDTO,
+  ): Promise<QuizResponseDTO> {
+    await this.quizBookService.findQuizBookbyId(id);
+    newQuizDTO.quizBookId = id;
+
+    const newQuiz = await this.quizService.createQuiz(newQuizDTO);
+
+    return new QuizResponseDTO(newQuiz);
   }
 
   @Delete(':id')

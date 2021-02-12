@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuizEntity } from 'src/entity/quiz.entity';
 import { Repository } from 'typeorm';
+import CreateQuizRequestDTO from './dto/create-quiz-request.dto';
 import { QuizResponseDTO } from './dto/quiz-response.dto';
 import UpdateQuizRequestDTO from './dto/update-quiz-request.dto';
 
@@ -32,6 +33,18 @@ export class QuizService {
     }
 
     return quizzes;
+  }
+
+  async createQuiz(quiz: CreateQuizRequestDTO): Promise<QuizEntity> {
+    const newQuiz = this.QuizRepository.create(quiz);
+
+    await this.QuizRepository.save(newQuiz).catch(() => {
+      throw new BadRequestException(
+        '잘못된 요청입니다. 필수 영역을 모두 입력해주세요.',
+      );
+    });
+
+    return newQuiz;
   }
 
   async updateQuiz(
