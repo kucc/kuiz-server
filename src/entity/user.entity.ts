@@ -41,10 +41,9 @@ export class UserEntity {
   })
   isMember: boolean;
 
-  @OneToMany(type=>QuizBookEntity, quizBook => quizBook.owner)
+  @OneToMany((type) => QuizBookEntity, (quizBook) => quizBook.ownerId)
   quizBooks: QuizBookEntity[];
 
-
-  @OneToMany(type=> UserSolveQuizBookEntity, solve=> solve.quizBook)
+  @OneToMany((type) => UserSolveQuizBookEntity, (solve) => solve.quizBook)
   solves: UserSolveQuizBookEntity[];
 }

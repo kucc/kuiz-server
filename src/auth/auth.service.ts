@@ -1,9 +1,11 @@
+import * as jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
+
+import SSOUserDTO from './dto/sso-user.dto';
+import { UserService } from '../user/user.service';
+import { SSORequestDTO } from '../user/dto/sso-request.dto';
 import { GoogleUserInfo } from 'src/common/google-auth-interface';
 import { UserResponseDTO } from 'src/user/dto/user-response.dto';
-import { UserService } from '../user/user.service';
-import * as jwt from 'jsonwebtoken';
-import SSOUserDTO from './dto/sso-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +20,21 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async linkWithSSO(ssoRequestDTO: SSORequestDTO): Promise<UserResponseDTO> {
+    const userExist = await this.userService.findByEmail(ssoRequestDTO.email);
+
+    if (!userExist) {
+      const newUser = await this.userService.createUserBySSO(ssoRequestDTO);
+      return newUser;
+    }
+
+    if (!userExist.isMember) {
+      await this.userService.joinUserWithSSO(userExist);
+    }
+
+    return userExist;
   }
 
   public decryptCodeFromSSOServer(code: string): SSOUserDTO {

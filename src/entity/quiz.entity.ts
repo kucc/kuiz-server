@@ -44,6 +44,7 @@ export class QuizEntity {
 
   @ManyToOne(() => QuizBookEntity, (quizBook) => quizBook.quizs)
   @JoinColumn({ name: 'quizBookId', referencedColumnName: 'id' })
+  @Column({ type: 'int', nullable: true })
   quizBookId: number;
 
   @OneToMany(() => UserSolveQuizBookEntity, (save) => save.savedQuiz)
