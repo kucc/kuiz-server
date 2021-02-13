@@ -25,14 +25,17 @@ export class QuizService {
     return quiz;
   }
 
-  async findByQuizBookId(quizBookId: number): Promise<QuizEntity[]> {
-    const quizzes = await this.QuizRepository.find({ quizBookId });
+  async findByQuizBookIdAndOrder(
+    quizBookId: number,
+    order: number,
+  ): Promise<QuizEntity> {
+    const quiz = await this.QuizRepository.findOne({ quizBookId, order });
 
-    if (!quizzes) {
-      throw new NotFoundException('문제집에 문제가 존재하지 않습니다.');
+    if (!quiz) {
+      throw new NotFoundException('문제가 존재하지 않습니다.');
     }
 
-    return quizzes;
+    return quiz;
   }
 
   async createQuiz(quiz: CreateQuizRequestDTO): Promise<QuizEntity> {

@@ -42,13 +42,10 @@ export class QuizBookController {
     @Query() query: { order: number },
     @Param('id') id: number,
   ): Promise<QuizResponseDTO> {
-    const quizzes = await this.quizService.findByQuizBookId(id);
-
-    if (quizzes.length < query.order) {
-      throw new BadRequestException('해당 번호의 문제가 없습니다.'); // check out of range
-    }
-
-    const quizOfOrder = quizzes[query.order - 1]; // or add 'order' column (논의)
+    const quizOfOrder = await this.quizService.findByQuizBookIdAndOrder(
+      id,
+      query.order,
+    );
 
     return new QuizResponseDTO(quizOfOrder);
   }

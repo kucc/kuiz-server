@@ -42,6 +42,9 @@ export class QuizEntity {
   @Column({ type: 'tinyint', default: false })
   isChoice: boolean;
 
+  @Column({ type: 'int', nullable: false })
+  order: number;
+
   @ManyToOne(() => QuizBookEntity, (quizBook) => quizBook.quizs)
   @JoinColumn({ name: 'quizBookId', referencedColumnName: 'id' })
   @Column({ type: 'int', nullable: true })
