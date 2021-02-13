@@ -6,6 +6,10 @@ export default class CreateQuizRequestDTO {
   public quizBookId: number;
 
   @IsNotEmpty()
+  @IsNumber()
+  public readonly order: number;
+
+  @IsNotEmpty()
   @IsString()
   public readonly question: string;
 

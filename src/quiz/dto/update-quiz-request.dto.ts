@@ -4,9 +4,8 @@ export default class UpdateQuizRequestDTO {
   @IsString()
   public readonly question: string;
 
-  // @IsString())
-  // public readonly answer: string;
-  // 문제 수정 규칙
+  @IsString()
+  public readonly answer: string;
 
   @IsString()
   public readonly option1: string;
