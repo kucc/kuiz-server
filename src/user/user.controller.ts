@@ -5,10 +5,9 @@ import {
   Patch,
   Query,
   Req,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { request, Request } from 'express';
+import { Request } from 'express';
 import { UserGuard } from 'src/common/guards/user.guard';
 import { UpdateNicknameRequestDTO } from './dto/update-nickname.dto';
 import { UserResponseDTO } from './dto/user-response.dto';
@@ -38,24 +37,20 @@ export class UserController {
   }
 
   @Get()
+  @UseGuards(new UserGuard())
   public async getUserInfo(@Req() request: Request): Promise<UserResponseDTO> {
     const { user } = request;
-    if (!user) {
-      throw new UnauthorizedException();
-    }
+
     return user;
   }
 
   @Patch('/:userId/nickname')
+  @UseGuards(new UserGuard())
   public async updateUserNickname(
-    @Req() reqeust: Request,
+    @Req() request: Request,
     @Body() nicknameDTO: UpdateNicknameRequestDTO,
   ) {
     const { user } = request;
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-
     const updatedUser = await this.userService.updateUserNickname(
       user.email,
       nicknameDTO.nickname,
