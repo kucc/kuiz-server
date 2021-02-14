@@ -59,8 +59,8 @@ export class QuizBookService {
     return [data, count];
   }
 
-  async checkAuthorization(
-    quizBookId: number,
+  async checkAuthorization(ownerId: number, userId: number): Promise<boolean> {
+    if (ownerId !== userId) {
     userId: number,
   ): Promise<boolean> {
     if (quizBookId !== userId) {
@@ -94,8 +94,8 @@ export class QuizBookService {
     quizBookId: number,
     userId: number,
   ): Promise<{ result: boolean }> {
-    await this.findQuizBookbyId(quizBookId);
-    await this.checkAuthorization(quizBookId, userId);
+    const quizBook = await this.findQuizBookbyId(quizBookId);
+    await this.checkAuthorization(quizBook.ownerId, userId);
 
     await this.quizBookRepository.delete({ id: quizBookId });
     return { result: true };
@@ -111,7 +111,7 @@ export class QuizBookService {
   ): Promise<QuizBookEntity> {
     const quizBook = await this.findQuizBookbyId(quizBookId);
 
-    await this.checkAuthorization(quizBookId, userId);
+    await this.checkAuthorization(quizBook.ownerId, userId);
 
     const editedQuizBook = this.quizBookRepository.merge(quizBook, quizbookDTO);
     await this.quizBookRepository.save(editedQuizBook);
