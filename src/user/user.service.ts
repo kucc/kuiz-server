@@ -7,7 +7,7 @@ import {
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entity/user.entity';
-import CreateUserRequestDTO from './dto/user-request.dto';
+import CreateUserDTO from './dto/create-user.dto';
 import { UserResponseDTO } from './dto/user-response.dto';
 import { SSORequestDTO } from './dto/sso-request.dto';
 
@@ -38,7 +38,7 @@ export class UserService {
     return user;
   }
 
-  async createUser(user: CreateUserRequestDTO): Promise<UserResponseDTO> {
+  async createUser(user: CreateUserDTO): Promise<UserResponseDTO> {
     // const kuDomain = req.user.email.indexOf('@korea.ac.kr');
     // if (kuDomain > -1) {
     //   // true: ku member -> but how to know whether kucc member?

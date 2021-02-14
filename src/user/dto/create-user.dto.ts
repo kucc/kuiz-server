@@ -1,6 +1,6 @@
 import { IsString, IsEmail } from 'class-validator';
 
-export default class CreateUserRequestDTO {
+export default class CreateUserDTO {
   @IsString()
   public readonly name: string;
 
