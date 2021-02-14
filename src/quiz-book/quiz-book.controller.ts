@@ -27,6 +27,7 @@ import {
 import { QuizService } from 'src/quiz/quiz.service';
 import { QuizResponseDTO } from 'src/quiz/dto/quiz-response.dto';
 import CreateQuizRequestDTO from 'src/quiz/dto/create-quiz-request.dto';
+import { StorageService } from 'src/storage/storage.service';
 
 @Controller('quiz-book')
 export class QuizBookController {
@@ -35,6 +36,7 @@ export class QuizBookController {
 
     @Inject(forwardRef(() => QuizService))
     private readonly quizService: QuizService,
+    private readonly storageService: StorageService,
   ) {}
 
   @Get(':id')
@@ -69,11 +71,15 @@ export class QuizBookController {
   @Post(':id/quiz')
   @UseGuards(new MemberGuard())
   async createQuiz(
+    @Req() request: Request,
     @Param('id') id: number,
     @Body() newQuizDTO: CreateQuizRequestDTO,
   ): Promise<QuizResponseDTO> {
     await this.quizBookService.findQuizBookbyId(id);
     newQuizDTO.quizBookId = id;
+
+    const quizImageURL = await this.storageService.upload(request); // upload image
+    newQuizDTO.imageURL = quizImageURL;
 
     const newQuiz = await this.quizService.createQuiz(newQuizDTO);
 
