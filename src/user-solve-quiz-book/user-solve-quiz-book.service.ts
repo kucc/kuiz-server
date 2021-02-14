@@ -7,37 +7,42 @@ import { UserSolveQuizBookEntity } from '../entity/user-solve-quiz-book.entity';
 export class UserSolveQuizBookService {
   constructor(
     @InjectRepository(UserSolveQuizBookEntity)
-    private readonly userSolveQuizBookRepository: Repository<UserSolveQuizBookEntity>
-  ){}
+    private readonly userSolveQuizBookRepository: Repository<UserSolveQuizBookEntity>,
+  ) {}
 
-  async findbyQBIdandUserId(quizBookId: number, userId: number)
-  {
+  async findbyQBIdandUserId(quizBookId: number, userId: number) {
     return await this.userSolveQuizBookRepository.findOne({
       where: {
         quizBookId,
         userId,
-      }
+      },
     });
   }
 
-  async createUserSolveQuizBook(quizBookId: number, userId: number): Promise<UserSolveQuizBookEntity>{
-    const newUSQB = this.userSolveQuizBookRepository.create({quizBookId, userId});
+  async createUserSolveQuizBook(
+    quizBookId: number,
+    userId: number,
+  ): Promise<UserSolveQuizBookEntity> {
+    const newUSQB = this.userSolveQuizBookRepository.create({
+      quizBookId,
+      userId,
+    });
     await this.userSolveQuizBookRepository.save(newUSQB);
+
     return newUSQB;
   }
 
-  async toggleQuizBookLikes(quizBookId: number, userId: number): Promise<boolean>{
+  async toggleQuizBookLikes(
+    quizBookId: number,
+    userId: number,
+  ): Promise<boolean> {
     let solvedQuizBook = await this.findbyQBIdandUserId(quizBookId, userId);
 
-    if(!solvedQuizBook){
-      solvedQuizBook = await this.createUserSolveQuizBook(quizBookId, userId);
+    if (!solvedQuizBook) {
+      solvedQuizBook = await this.createUserSolveQuizBook(quizBookId, userId); // solve APId에서 create되면 지워도됨
     }
 
-    if(solvedQuizBook.liked){
-      solvedQuizBook.liked = false;
-    }else {
-      solvedQuizBook.liked = true;
-    }
+    solvedQuizBook.liked = !solvedQuizBook.liked;
     await this.userSolveQuizBookRepository.save(solvedQuizBook);
 
     return solvedQuizBook.liked;

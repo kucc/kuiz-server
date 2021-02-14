@@ -6,6 +6,6 @@ import { UserSolveQuizBookService } from './user-solve-quiz-book.service';
 @Module({
   imports: [TypeOrmModule.forFeature([UserSolveQuizBookEntity])],
   providers: [UserSolveQuizBookService],
-  exports: [UserSolveQuizBookService]
+  exports: [UserSolveQuizBookService],
 })
 export class UserSolveQuizBookModule {}

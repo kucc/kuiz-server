@@ -22,15 +22,15 @@ export class AuthService {
     return user;
   }
 
-  async linkWithSSO(ssoRequestDTO: SSORequestDTO): Promise<UserResponseDTO>{
+  async linkWithSSO(ssoRequestDTO: SSORequestDTO): Promise<UserResponseDTO> {
     const userExist = await this.userService.findByEmail(ssoRequestDTO.email);
 
-    if(!userExist){
+    if (!userExist) {
       const newUser = await this.userService.createUserBySSO(ssoRequestDTO);
       return newUser;
     }
 
-    if(!userExist.isMember){
+    if (!userExist.isMember) {
       await this.userService.joinUserWithSSO(userExist);
     }
 

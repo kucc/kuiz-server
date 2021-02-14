@@ -1,8 +1,8 @@
-import { IsEmail, IsString } from "class-validator";
-import SSOUserDTO from "../../auth/dto/sso-user.dto";
+import { IsEmail, IsString } from 'class-validator';
+import SSOUserDTO from '../../auth/dto/sso-user.dto';
 
-export class SSORequestDTO{
-  constructor(sso: SSOUserDTO){
+export class SSORequestDTO {
+  constructor(sso: SSOUserDTO) {
     this.email = sso.email;
     this.name = sso.name;
     this.isMember = true;

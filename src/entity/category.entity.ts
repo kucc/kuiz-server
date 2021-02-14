@@ -1,21 +1,18 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import { QuizBookEntity } from "./quiz-book.entity";
+import { QuizBookEntity } from './quiz-book.entity';
 
 @Entity('category')
-export class CategoryEntity{
-
+export class CategoryEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({type: 'varchar', length:45, nullable: false})
+  @Column({ type: 'varchar', length: 45, nullable: false })
   name: string;
 
-  
-  @Column({type: 'varchar', length:45, nullable: false})
+  @Column({ type: 'varchar', length: 45, nullable: false })
   topic: string;
 
-  @OneToMany(type=>QuizBookEntity, quizBook => quizBook.category)
+  @OneToMany((type) => QuizBookEntity, (quizBook) => quizBook.category)
   quizBooks: QuizBookEntity[];
-
 }

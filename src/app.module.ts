@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { QuizModule } from './quiz/quiz.module';
 import { QuizBookModule } from './quiz-book/quiz-book.module';
 import { DeserializeUserMiddleware } from './common/middleware/deserialize-user';
 import { UserSolveQuizBookModule } from './user-solve-quiz-book/user-solve-quiz-book.module';
@@ -20,8 +21,9 @@ import { UserSolveQuizBookModule } from './user-solve-quiz-book/user-solve-quiz-
     TypeOrmModule.forRoot(),
     UserModule,
     AuthModule,
+    QuizModule,
     QuizBookModule,
-    UserSolveQuizBookModule
+    UserSolveQuizBookModule,
   ],
   controllers: [AppController],
   providers: [AppService],

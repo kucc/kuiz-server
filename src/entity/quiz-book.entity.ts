@@ -1,54 +1,65 @@
-import { Column, Entity,  JoinColumn,  ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
-import { QuizEntity } from "./quiz.entity";
-import { UserEntity } from "./user.entity";
-import { CategoryEntity } from "./category.entity";
-import { UserSolveQuizBookEntity } from "./user-solve-quiz-book.entity";
+import { QuizEntity } from './quiz.entity';
+import { UserEntity } from './user.entity';
+import { CategoryEntity } from './category.entity';
+import { UserSolveQuizBookEntity } from './user-solve-quiz-book.entity';
 
 @Entity('quizBook')
 export class QuizBookEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({type:'varchar', length:45, nullable:false})
+  @Column({ type: 'varchar', length: 45, nullable: false })
   title: string;
 
-  @Column({type:'varchar', length:45, nullable:false})
+  @Column({ type: 'varchar', length: 45, nullable: false })
   ownerName: string;
 
-  @Column({type:'int', default: 0})
+  @Column({ type: 'int', default: 0 })
   quizCount: number;
 
-  @Column({type:'int', default: 0})
+  @Column({ type: 'int', default: 0 })
   solvedCount: number;
 
   //수정 CreatedColumn
-  @Column({type: 'timestamp', default: ()=> 'CURRENT_TIMESTAMP'})
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({type: 'int', default:0})
+  @Column({ type: 'int', default: 0 })
   likedCount: number;
 
-  @Column({type: 'tinyint', default: false})
+  @Column({ type: 'tinyint', default: false })
   completed: boolean;
 
-  @Column({type:'int', nullable: false})
-  categoryId: number;
-
-  @Column({type: 'int', nullable: false})
-  ownerId: number;
-
-  @ManyToOne(type=> CategoryEntity, category => category.quizBooks, {nullable: false})
-  @JoinColumn({name: 'categoryId',referencedColumnName: 'id'})
+  @ManyToOne((type) => CategoryEntity, (category) => category.quizBooks)
+  @JoinColumn({ name: 'categoryId', referencedColumnName: 'id' })
   category: CategoryEntity;
 
-  @ManyToOne(type => UserEntity, user => user.quizBooks, {nullable: false})
-  @JoinColumn({name: 'ownerId', referencedColumnName: 'id'})
+  @ManyToOne((type) => UserEntity, (user) => user.quizBooks)
+  @JoinColumn({ name: 'ownerId', referencedColumnName: 'id' })
+  @Column({ type: 'int', nullable: false })
+  categoryId: number;
+
+  @Column({ type: 'int', nullable: false })
+  ownerId: number;
+
+  @ManyToOne((type) => UserEntity, (user) => user.quizBooks, {
+    nullable: false,
+  })
+  @JoinColumn({ name: 'ownerId', referencedColumnName: 'id' })
   owner: UserEntity;
 
-  @OneToMany(type=>QuizEntity, quiz => quiz.quizBook)
+  @OneToMany(() => QuizEntity, (quiz) => quiz.quizBookId)
   quizs: QuizEntity[];
 
-  @OneToMany(type=> UserSolveQuizBookEntity, solve => solve.quizBook)
+  @OneToMany((type) => UserSolveQuizBookEntity, (solve) => solve.quizBook)
   solves: UserSolveQuizBookEntity[];
 }
