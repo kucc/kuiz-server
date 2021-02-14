@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   ConflictException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,7 +28,7 @@ export class UserService {
     return allUsers;
   }
 
-  async findByEmail(email: string): Promise<UserResponseDTO> {
+  async findByEmail(email: string) {
     const user = await this.UserRepository.findOne({
       where: {
         email: email,
@@ -60,9 +61,18 @@ export class UserService {
     return new UserResponseDTO(newUser);
   }
 
-  async joinUserWithSSO(user: UserResponseDTO){
-    await this.UserRepository.update(user, {isMember: true});
+  async joinUserWithSSO(user: UserResponseDTO) {
+    await this.UserRepository.update(user, { isMember: true });
   }
 
- 
+  async updateUserNickname(email: string, nickname: string) {
+    const user = await this.findByEmail(email);
+    const updatedUser = this.UserRepository.merge(user, { name: nickname });
+
+    await this.UserRepository.save(updatedUser).catch(() => {
+      throw new ServiceUnavailableException();
+    });
+
+    return updatedUser;
+  }
 }

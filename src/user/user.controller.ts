@@ -1,5 +1,13 @@
-import { Controller, Get, Req, UnauthorizedException } from '@nestjs/common';
-import { Request } from 'express';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { request, Request } from 'express';
+import { UpdateNicknameRequestDTO } from './dto/update-nickname.dto';
 import { UserResponseDTO } from './dto/user-response.dto';
 import { UserService } from './user.service';
 
@@ -14,5 +22,23 @@ export class UserController {
       throw new UnauthorizedException();
     }
     return user;
+  }
+
+  @Patch('/:userId/nickname')
+  public async updateUserNickname(
+    @Req() reqeust: Request,
+    @Body() nicknameDTO: UpdateNicknameRequestDTO,
+  ) {
+    const { user } = request;
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    const updatedUser = await this.userService.updateUserNickname(
+      user.email,
+      nicknameDTO.nickname,
+    );
+
+    return updatedUser;
   }
 }
