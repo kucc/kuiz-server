@@ -76,6 +76,18 @@ export class UserService {
     return updatedUser;
   }
 
+  async getTotalPointRank(start, count) {
+    const rankList = await this.userRepository.find({
+      order: {
+        point: 'DESC',
+      },
+      skip: start - 1,
+      take: count,
+    });
+    console.log(rankList);
+    return rankList;
+  }
+
   async getUserRank(userid) {
     const rank = await this.userRepository.query(`SELECT name, point, level, 
     (SELECT COUNT(*)+1 FROM user WHERE point > u.point ) AS rank FROM user AS u WHERE id=${userid}`);
