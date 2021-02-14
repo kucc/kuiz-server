@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   ConflictException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,7 +28,17 @@ export class UserService {
     return allUsers;
   }
 
-  async findByEmail(email: string): Promise<UserResponseDTO> {
+  async findUserById(id: number): Promise<UserEntity> {
+    const user = await this.UserRepository.findOne({
+      id,
+    });
+    if (!user) {
+      throw new NotFoundException('잘못된 회원정보입니다.');
+    }
+    return user;
+  }
+
+  async findUserByEmail(email: string): Promise<UserResponseDTO> {
     const user = await this.UserRepository.findOne({
       where: {
         email: email,
@@ -37,11 +48,7 @@ export class UserService {
     return user;
   }
 
-  async createUser(user: CreateUserDTO): Promise<UserResponseDTO> {
-    // const kuDomain = req.user.email.indexOf('@korea.ac.kr');
-    // if (kuDomain > -1) {
-    //   // true: ku member -> but how to know whether kucc member?
-    // }
+  async createUser(user: CreateUserRequestDTO): Promise<UserResponseDTO> {
     const newUser = this.UserRepository.create(user);
     await this.UserRepository.save(newUser).catch(() => {
       throw new BadRequestException('잘못된 요청입니다.');
@@ -62,5 +69,10 @@ export class UserService {
 
   async joinUserWithSSO(user: UserResponseDTO) {
     await this.UserRepository.update(user, { isMember: true });
+  }
+
+  async increaseUserPoint(userId: number) {
+    const user = await this.findUserById(userId);
+    await this.UserRepository.increment(user, 'point', 30);
   }
 }

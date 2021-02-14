@@ -12,7 +12,7 @@ export class AuthService {
   constructor(private readonly userService: UserService) {}
 
   async validateUser(userInfo: GoogleUserInfo): Promise<UserResponseDTO> {
-    const user = await this.userService.findByEmail(userInfo.email);
+    const user = await this.userService.findUserByEmail(userInfo.email);
 
     if (!user) {
       const newUser = await this.userService.createUser(userInfo);
@@ -23,7 +23,9 @@ export class AuthService {
   }
 
   async linkWithSSO(ssoRequestDTO: SSORequestDTO): Promise<UserResponseDTO> {
-    const userExist = await this.userService.findByEmail(ssoRequestDTO.email);
+    const userExist = await this.userService.findUserByEmail(
+      ssoRequestDTO.email,
+    );
 
     if (!userExist) {
       const newUser = await this.userService.createUserBySSO(ssoRequestDTO);
