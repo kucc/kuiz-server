@@ -10,6 +10,7 @@ import { QuizModule } from './quiz/quiz.module';
 import { QuizBookModule } from './quiz-book/quiz-book.module';
 import { DeserializeUserMiddleware } from './common/middleware/deserialize-user';
 import { UserSolveQuizBookModule } from './user-solve-quiz-book/user-solve-quiz-book.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserSolveQuizBookModule } from './user-solve-quiz-book/user-solve-quiz-
     QuizModule,
     QuizBookModule,
     UserSolveQuizBookModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
