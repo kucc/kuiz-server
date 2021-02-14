@@ -60,10 +60,6 @@ export class QuizBookController {
     @Query('isDone') isDone: boolean,
   ) {
     const { user } = request;
-    if (!user) {
-      throw new UnauthorizedException('login이 필요한 api');
-    }
-
     const quizBookList = await this.quizBookService.getQuizBookOwnedByUSer(
       user.id,
       isDone,
