@@ -78,8 +78,10 @@ export class QuizBookController {
     await this.quizBookService.findQuizBookbyId(id);
     newQuizDTO.quizBookId = id;
 
-    const quizImageURL = await this.storageService.upload(request); // upload image
-    newQuizDTO.imageURL = quizImageURL;
+    if (request.files) {
+      const quizImageURL = await this.storageService.upload(request);
+      newQuizDTO.imageURL = quizImageURL;
+    }
 
     const newQuiz = await this.quizService.createQuiz(newQuizDTO);
 

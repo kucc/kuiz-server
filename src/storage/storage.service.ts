@@ -16,13 +16,11 @@ export class StorageService {
   }
 
   async upload(@Req() req): Promise<string> {
-    const fileContent = Buffer.from(req.files.filename.data, 'binary');
-
     const params = {
       Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: req.files.filename.name,
       ACL: 'public-read',
-      Body: fileContent,
+      Body: req.files.filename.data,
     };
 
     const result = await this.S3.upload(params)
