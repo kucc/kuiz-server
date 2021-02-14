@@ -84,7 +84,6 @@ export class UserService {
       skip: start - 1,
       take: count,
     });
-    console.log(rankList);
     return rankList;
   }
 
