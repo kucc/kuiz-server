@@ -15,9 +15,7 @@ export class CreateQuizBookDTO {
 }
 
 export class EditQuizBookDTO {
-  @IsNotEmpty()
-  readonly title: string;
+  readonly title?: string;
 
-  @IsNotEmpty()
-  readonly categoryId: number;
+  readonly categoryId?: number;
 }
