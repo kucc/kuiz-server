@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -8,12 +9,17 @@ import {
 import { QuizBookEntity } from '../entity/quiz-book.entity';
 import { CreateQuizBookDTO, EditQuizBookDTO } from './dto/quizbook-request.dto';
 import { UserSolveQuizBookService } from '../user-solve-quiz-book/user-solve-quiz-book.service';
+import { UserSolveQuizBookEntity } from 'src/entity/user-solve-quiz-book.entity';
 
 @Injectable()
 export class QuizBookService {
   constructor(
     @InjectRepository(QuizBookEntity)
     private readonly quizBookRepository: Repository<QuizBookEntity>,
+
+    @InjectRepository(UserSolveQuizBookEntity)
+    private readonly userSolveQuizBookRespository: Repository<UserSolveQuizBookEntity>,
+
     private readonly userSolveQuizBookService: UserSolveQuizBookService,
   ) {}
 
@@ -100,5 +106,26 @@ export class QuizBookService {
 
   async solveQuiz(quizId: number, userId: number) {
     // TODO
+  }
+
+  async getQuizBookOwnedByUSer(userId: number, isDone: boolean) {
+    const quizBookList = await this.quizBookRepository.find({
+      ownerId: userId,
+      completed: isDone,
+    });
+
+    return quizBookList;
+  }
+
+  async getQuizBookSolvedByUser(userId: number, isDone: boolean) {
+    const quizBookList = await this.userSolveQuizBookRespository.find({
+      relations: ['quizBook'],
+      where: {
+        userId,
+        completed: isDone,
+      },
+    });
+
+    return quizBookList;
   }
 }
