@@ -6,7 +6,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { QuizEntity } from './quiz.entity';
 import { UserEntity } from './user.entity';
 import { QuizBookEntity } from './quiz-book.entity';
 
@@ -21,7 +20,7 @@ export class UserSolveQuizBookEntity {
   @Column({ type: 'tinyint', default: false })
   liked: boolean;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', default: -1 })
   savedQuizId: number;
 
   @Column({ type: 'int', nullable: false })
@@ -29,12 +28,6 @@ export class UserSolveQuizBookEntity {
 
   @Column({ type: 'int', nullable: false })
   quizBookId: number;
-
-  @ManyToOne((type) => QuizEntity, (savedQuiz) => savedQuiz.saves, {
-    nullable: false,
-  })
-  @JoinColumn({ name: 'savedQuizId', referencedColumnName: 'id' })
-  savedQuiz: QuizEntity;
 
   @ManyToOne((type) => UserEntity, (user) => user.solves, { nullable: false })
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })

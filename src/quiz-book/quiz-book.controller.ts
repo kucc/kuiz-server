@@ -125,8 +125,17 @@ export class QuizBookController {
 
   // TODO
   @Post(':id/solve')
-  async solveQuiz(@Param('id') id: number) {
+  @UseGuards(new UserGuard())
+  async solveQuizBook(
+    @Req() request: Request,
+    @Param('id') quizBookId: number,
+    @Body() solveQuizBookDTO: SolveQuizBookDTO,
+  ): Promise<SolveResultQuizBookDTO> {
     const userId = request.user.id;
-    await this.quizBookService.solveQuiz(id, userId);
+    return await this.quizBookService.solveQuizBook(
+      quizBookId,
+      userId,
+      solveQuizBookDTO,
+    );
   }
 }
