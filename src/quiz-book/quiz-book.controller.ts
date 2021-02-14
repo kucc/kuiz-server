@@ -13,7 +13,7 @@ import {
   Inject,
   BadRequestException,
 } from '@nestjs/common';
-import { request, Request } from 'express';
+import { Request } from 'express';
 
 import { QuizBookService } from './quiz-book.service';
 import { UserGuard } from '../common/guards/user.guard';
@@ -27,6 +27,8 @@ import {
 import { QuizService } from 'src/quiz/quiz.service';
 import { QuizResponseDTO } from 'src/quiz/dto/quiz-response.dto';
 import CreateQuizRequestDTO from 'src/quiz/dto/create-quiz-request.dto';
+import { SolveQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-request.dto';
+import { SolveResultQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-response.dto';
 
 @Controller('quiz-book')
 export class QuizBookController {
@@ -123,7 +125,6 @@ export class QuizBookController {
     return new LikeQuizBookResponseDTO(likedQuizBook);
   }
 
-  // TODO
   @Post(':id/solve')
   @UseGuards(new UserGuard())
   async solveQuizBook(

@@ -7,12 +7,12 @@ import {
 } from '@nestjs/common';
 
 import { UserService } from '../user/user.service';
+import { QUIZBOOKS_PER_PAGE } from '../../constants';
 import { QuizBookEntity } from '../entity/quiz-book.entity';
 import { CreateQuizBookDTO, EditQuizBookDTO } from './dto/quizbook-request.dto';
 import { UserSolveQuizBookService } from '../user-solve-quiz-book/user-solve-quiz-book.service';
 import { SolveQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-request.dto';
 import { SolveResultQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-response.dto';
-import { QUIZBOOKS_PER_PAGE } from '../../constants';
 
 @Injectable()
 export class QuizBookService {
@@ -23,11 +23,7 @@ export class QuizBookService {
     private readonly userSolveQuizBookService: UserSolveQuizBookService,
     private readonly userSerive: UserService,
   ) {}
-  ) {}
 
-  async findQuizBookbyId(id: number): Promise<QuizBookEntity> {
-    const quizBook = await this.quizBookRepository.findOne({ id });
-    if (!quizBook) {
   async findQuizBookbyId(id: number): Promise<QuizBookEntity> {
     const quizBook = await this.quizBookRepository.findOne({ id });
 
@@ -61,14 +57,6 @@ export class QuizBookService {
 
   async checkAuthorization(ownerId: number, userId: number): Promise<boolean> {
     if (ownerId !== userId) {
-    userId: number,
-  ): Promise<boolean> {
-    if (quizBookId !== userId) {
-  async checkAuthorization(
-    quizBookId: number,
-    userId: number,
-  ): Promise<boolean> {
-    if (quizBookId !== userId) {
       throw new UnauthorizedException('권한이 없습니다.');
     }
 
@@ -89,7 +77,6 @@ export class QuizBookService {
     return quizBook;
   }
 
-  async deleteQuizBook(quizBookId: number, userId: number) {
   async deleteQuizBook(
     quizBookId: number,
     userId: number,
@@ -98,9 +85,6 @@ export class QuizBookService {
     await this.checkAuthorization(quizBook.ownerId, userId);
 
     await this.quizBookRepository.delete({ id: quizBookId });
-    return { result: true };
-    await this.quizBookRepository.delete({ id: quizBookId });
-
     return { result: true };
   }
 
@@ -133,10 +117,7 @@ export class QuizBookService {
       quizBookId,
       userId,
     );
-    if (like) {
-      await this.quizBookRepository.increment(quizBook, 'likedCount', 1);
-    } else {
-      await this.quizBookRepository.increment(quizBook, 'likedCount', -1);
+
     if (isUserLiked) {
       quizBook.likedCount += 1;
     } else {
@@ -144,16 +125,6 @@ export class QuizBookService {
     }
 
     return await this.quizBookRepository.save(quizBook);
-  }
-
-  async isCompleteQuizBook(
-    quizOrder: number,
-    quizCount: number,
-  ): Promise<boolean> {
-    if (quizOrder === quizCount - 1) {
-      return true;
-    }
-    return false;
   }
 
   async solveQuizBook(
