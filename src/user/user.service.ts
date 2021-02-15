@@ -91,6 +91,6 @@ export class UserService {
     const rank = await this.userRepository.query(`SELECT name, point, level, 
     (SELECT COUNT(*)+1 FROM user WHERE point > u.point ) AS rank FROM user AS u WHERE id=${userid}`);
 
-    return rank;
+    return rank[0];
   }
 }
