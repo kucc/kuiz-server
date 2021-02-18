@@ -11,8 +11,6 @@ import {
   UseGuards,
   forwardRef,
   Inject,
-  BadRequestException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
 

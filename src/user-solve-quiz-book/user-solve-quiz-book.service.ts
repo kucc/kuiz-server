@@ -50,7 +50,8 @@ export class UserSolveQuizBookService {
   }
 
   async isLastQuiz(quizOrder: number, quizCount: number): Promise<boolean> {
-    if (quizOrder === quizCount - 1) {
+    if (quizOrder >= quizCount) {
+      // order > quizCount due to deletion
       return true;
     }
     return false;
