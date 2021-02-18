@@ -8,7 +8,6 @@ import {
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entity/user.entity';
-import CreateUserDTO from './dto/create-user.dto';
 import { UserResponseDTO } from './dto/user-response.dto';
 import { SSORequestDTO } from './dto/sso-request.dto';
 import CreateUserRequestDTO from './dto/user-request.dto';
@@ -30,9 +29,8 @@ export class UserService {
     return allUsers;
   }
 
-
   async findUserById(id: number): Promise<UserEntity> {
-    const user = await this.UserRepository.findOne({
+    const user = await this.userRepository.findOne({
       id,
     });
     if (!user) {
@@ -41,11 +39,8 @@ export class UserService {
     return user;
   }
 
-  async findUserByEmail(email: string): Promise<UserResponseDTO> {
-    const user = await this.UserRepository.findOne({
-
-//   async findByEmail(email: string) {
-//     const user = await this.userRepository.findOne({
+  async findUserByEmail(email: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
       where: {
         email: email,
       },
@@ -57,7 +52,6 @@ export class UserService {
   async createUser(user: CreateUserRequestDTO): Promise<UserResponseDTO> {
     const newUser = this.userRepository.create(user);
     await this.userRepository.save(newUser).catch(() => {
-
       throw new BadRequestException('잘못된 요청입니다.');
     });
 
@@ -79,7 +73,7 @@ export class UserService {
   }
 
   async updateUserNickname(email: string, nickname: string) {
-    const user = await this.findByEmail(email);
+    const user = await this.findUserByEmail(email);
     const updatedUser = this.userRepository.merge(user, { name: nickname });
 
     await this.userRepository.save(updatedUser).catch(() => {
@@ -109,6 +103,6 @@ export class UserService {
 
   async increaseUserPoint(userId: number) {
     const user = await this.findUserById(userId);
-    await this.UserRepository.increment(user, 'point', 30);
+    await this.userRepository.increment(user, 'point', 30);
   }
 }

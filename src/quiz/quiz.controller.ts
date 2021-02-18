@@ -11,10 +11,10 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { MemberGuard } from 'src/common/guards/member.guard';
-import { UserGuard } from 'src/common/guards/user.guard';
 import { QuizBookService } from 'src/quiz-book/quiz-book.service';
 import UpdateQuizRequestDTO from './dto/update-quiz-request.dto';
 import { QuizService } from './quiz.service';
+import { StorageService } from 'src/storage/storage.service';
 
 @Controller('quiz')
 export class QuizController {
@@ -23,6 +23,7 @@ export class QuizController {
 
     @Inject(forwardRef(() => QuizBookService))
     private readonly quizBookService: QuizBookService,
+    private readonly storageService: StorageService,
   ) {}
 
   @Patch(':quizId')
@@ -39,6 +40,11 @@ export class QuizController {
 
     if (quizBook.ownerId !== request.user.id) {
       throw new UnauthorizedException('권한이 없습니다.');
+    }
+
+    if (request.files) {
+      const quizImageURL = await this.storageService.upload(request);
+      requestDTO.imageURL = quizImageURL;
     }
 
     const updatedQuiz = await this.quizService.updateQuiz(quiz, requestDTO);

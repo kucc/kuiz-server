@@ -1,7 +1,6 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -114,11 +113,6 @@ export class QuizBookService {
   ): Promise<QuizBookEntity> {
     const quizBook = await this.findQuizBookbyId(quizBookId);
     const isUserLiked = await this.userSolveQuizBookService.toggleQuizBookLikes(
-      quizBookId,
-      userId,
-    );
-
-    const like = await this.userSolveQuizBookService.toggleQuizBookLikes(
       quizBookId,
       userId,
     );
