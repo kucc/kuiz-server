@@ -70,7 +70,7 @@ export class QuizBookController {
     return quizBookList;
   }
 
-  @Get(':id')
+  @Get(':id/quiz')
   async getQuizOfOrder(
     @Query() query: { order: number },
     @Param('id') id: number,
