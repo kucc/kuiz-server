@@ -30,7 +30,6 @@ export class UserService {
     return allUsers;
   }
 
-
   async findUserById(id: number): Promise<UserEntity> {
     const user = await this.UserRepository.findOne({
       id,
@@ -43,9 +42,8 @@ export class UserService {
 
   async findUserByEmail(email: string): Promise<UserResponseDTO> {
     const user = await this.UserRepository.findOne({
-
-//   async findByEmail(email: string) {
-//     const user = await this.userRepository.findOne({
+      //   async findByEmail(email: string) {
+      //     const user = await this.userRepository.findOne({
       where: {
         email: email,
       },
@@ -57,7 +55,6 @@ export class UserService {
   async createUser(user: CreateUserRequestDTO): Promise<UserResponseDTO> {
     const newUser = this.userRepository.create(user);
     await this.userRepository.save(newUser).catch(() => {
-
       throw new BadRequestException('잘못된 요청입니다.');
     });
 
