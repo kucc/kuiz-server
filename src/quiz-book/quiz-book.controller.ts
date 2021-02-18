@@ -114,6 +114,7 @@ export class QuizBookController {
       newQuizDTO.imageURL = quizImageURL;
     }
 
+    //TODO: quiz 추가시 quizBook count update
     const newQuiz = await this.quizService.createQuiz(newQuizDTO);
 
     return new QuizResponseDTO(newQuiz);
