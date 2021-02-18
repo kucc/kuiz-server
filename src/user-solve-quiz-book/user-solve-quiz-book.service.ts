@@ -51,7 +51,7 @@ export class UserSolveQuizBookService {
 
   async isLastQuiz(quizOrder: number, quizCount: number): Promise<boolean> {
     if (quizOrder >= quizCount) {
-      // order > quizCount due to deletion
+      // TODO: relogic
       return true;
     }
     return false;
@@ -68,7 +68,11 @@ export class UserSolveQuizBookService {
       userId,
     );
     solvedQuizBook.savedQuizId = solvedQuizBookDTO.quizId;
-    if (this.isLastQuiz(solvedQuizBookDTO.quizOrder, quizCount)) {
+    const isLastQuiz = await this.isLastQuiz(
+      solvedQuizBookDTO.quizOrder,
+      quizCount,
+    );
+    if (isLastQuiz) {
       solvedQuizBook.completed = true;
     }
 
