@@ -31,7 +31,7 @@ export class UserEntity {
 
   @Column({
     type: 'int',
-    default: 0,
+    default: 1,
   })
   level: number;
 

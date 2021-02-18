@@ -12,6 +12,7 @@ import {
   forwardRef,
   Inject,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
 
@@ -38,6 +39,36 @@ export class QuizBookController {
     @Inject(forwardRef(() => QuizService))
     private readonly quizService: QuizService,
   ) {}
+
+  @Get('solving')
+  @UseGuards(new UserGuard())
+  async getQuizBookSolvedByUser(
+    @Req() request: Request,
+    @Query('isDone') isDone: boolean,
+  ) {
+    const { user } = request;
+    const quizBookList = await this.quizBookService.getQuizBookSolvedByUser(
+      user.id,
+      isDone,
+    );
+
+    return quizBookList;
+  }
+
+  @Get('owner')
+  @UseGuards(new UserGuard())
+  async getQuizBookOwnedByUSer(
+    @Req() request: Request,
+    @Query('isDone') isDone: boolean,
+  ) {
+    const { user } = request;
+    const quizBookList = await this.quizBookService.getQuizBookOwnedByUSer(
+      user.id,
+      isDone,
+    );
+
+    return quizBookList;
+  }
 
   @Get(':id')
   async getQuizOfOrder(
