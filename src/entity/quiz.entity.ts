@@ -3,12 +3,10 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 import { QuizBookEntity } from './quiz-book.entity';
-import { UserSolveQuizBookEntity } from './user-solve-quiz-book.entity';
 
 @Entity('quiz')
 export class QuizEntity {
@@ -23,6 +21,9 @@ export class QuizEntity {
 
   @Column({ type: 'text', nullable: false })
   imageURL: string;
+
+  @Column({ type: 'int', default: 0 })
+  order: number;
 
   @Column({ type: 'text', nullable: true })
   option1: string;
@@ -42,14 +43,10 @@ export class QuizEntity {
   @Column({ type: 'tinyint', default: false })
   isChoice: boolean;
 
-  @Column({ type: 'int', nullable: false })
-  order: number;
-
-  @ManyToOne(() => QuizBookEntity, (quizBook) => quizBook.quizs)
-  @JoinColumn({ name: 'quizBookId', referencedColumnName: 'id' })
   @Column({ type: 'int', nullable: true })
   quizBookId: number;
 
-  @OneToMany(() => UserSolveQuizBookEntity, (save) => save.savedQuiz)
-  saves: UserSolveQuizBookEntity[];
+  @ManyToOne((type) => QuizBookEntity, (quizBook) => quizBook.quizs)
+  @JoinColumn({ name: 'quizBookId', referencedColumnName: 'id' })
+  quizBook: QuizBookEntity;
 }

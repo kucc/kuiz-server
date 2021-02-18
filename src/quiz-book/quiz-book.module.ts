@@ -3,8 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserSolveQuizBookEntity } from 'src/entity/user-solve-quiz-book.entity';
 import { QuizModule } from 'src/quiz/quiz.module';
 import { QuizBookEntity } from '../entity/quiz-book.entity';
-import { UserSolveQuizBookModule } from '../user-solve-quiz-book/user-solve-quiz-book.module';
 import { QuizBookController } from './quiz-book.controller';
+import { UserSolveQuizBookModule } from '../user-solve-quiz-book/user-solve-quiz-book.module';
+import { UserModule } from '../user/user.module';
 import { QuizBookService } from './quiz-book.service';
 
 @Module({
@@ -12,6 +13,8 @@ import { QuizBookService } from './quiz-book.service';
     TypeOrmModule.forFeature([QuizBookEntity, UserSolveQuizBookEntity]),
     UserSolveQuizBookModule,
     forwardRef(() => QuizModule),
+    UserSolveQuizBookModule,
+    UserModule,
   ],
   controllers: [QuizBookController],
   providers: [QuizBookService],

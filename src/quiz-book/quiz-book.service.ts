@@ -6,9 +6,14 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+
+import { UserService } from '../user/user.service';
+import { QUIZBOOKS_PER_PAGE } from '../../constants';
 import { QuizBookEntity } from '../entity/quiz-book.entity';
 import { CreateQuizBookDTO, EditQuizBookDTO } from './dto/quizbook-request.dto';
 import { UserSolveQuizBookService } from '../user-solve-quiz-book/user-solve-quiz-book.service';
+import { SolveQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-request.dto';
+import { SolveResultQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-response.dto';
 import { UserSolveQuizBookEntity } from 'src/entity/user-solve-quiz-book.entity';
 
 @Injectable()
@@ -21,6 +26,7 @@ export class QuizBookService {
     private readonly userSolveQuizBookRespository: Repository<UserSolveQuizBookEntity>,
 
     private readonly userSolveQuizBookService: UserSolveQuizBookService,
+    private readonly userSerive: UserService,
   ) {}
 
   async findQuizBookbyId(id: number): Promise<QuizBookEntity> {
@@ -33,11 +39,29 @@ export class QuizBookService {
     return quizBook;
   }
 
-  async checkAuthorization(
-    quizBookId: number,
-    userId: number,
-  ): Promise<boolean> {
-    if (quizBookId !== userId) {
+  async findAllQuizBookByCategory(
+    categoryId: number,
+    page: number,
+  ): Promise<[QuizBookEntity[], number]> {
+    const take = QUIZBOOKS_PER_PAGE;
+    const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+
+    const [data, count] = await this.quizBookRepository.findAndCount({
+      where: {
+        categoryId,
+      },
+      take,
+      skip,
+    });
+
+    if (!data.length) {
+      throw new NotFoundException('페이지가 존재하지 않습니다.');
+    }
+    return [data, count];
+  }
+
+  async checkAuthorization(ownerId: number, userId: number): Promise<boolean> {
+    if (ownerId !== userId) {
       throw new UnauthorizedException('권한이 없습니다.');
     }
 
@@ -62,11 +86,10 @@ export class QuizBookService {
     quizBookId: number,
     userId: number,
   ): Promise<{ result: boolean }> {
-    await this.findQuizBookbyId(quizBookId);
-    await this.checkAuthorization(quizBookId, userId);
+    const quizBook = await this.findQuizBookbyId(quizBookId);
+    await this.checkAuthorization(quizBook.ownerId, userId);
 
     await this.quizBookRepository.delete({ id: quizBookId });
-
     return { result: true };
   }
 
@@ -77,7 +100,7 @@ export class QuizBookService {
   ): Promise<QuizBookEntity> {
     const quizBook = await this.findQuizBookbyId(quizBookId);
 
-    await this.checkAuthorization(quizBookId, userId);
+    await this.checkAuthorization(quizBook.ownerId, userId);
 
     const editedQuizBook = this.quizBookRepository.merge(quizBook, quizbookDTO);
     await this.quizBookRepository.save(editedQuizBook);
@@ -95,6 +118,11 @@ export class QuizBookService {
       userId,
     );
 
+    const like = await this.userSolveQuizBookService.toggleQuizBookLikes(
+      quizBookId,
+      userId,
+    );
+
     if (isUserLiked) {
       quizBook.likedCount += 1;
     } else {
@@ -104,8 +132,25 @@ export class QuizBookService {
     return await this.quizBookRepository.save(quizBook);
   }
 
-  async solveQuiz(quizId: number, userId: number) {
-    // TODO
+  async solveQuizBook(
+    quizBookId: number,
+    userId: number,
+    solveQuizBookDTO: SolveQuizBookDTO,
+  ): Promise<SolveResultQuizBookDTO> {
+    const quizBook = await this.findQuizBookbyId(quizBookId);
+
+    const solvedQuizBook = await this.userSolveQuizBookService.solveQuizBook(
+      quizBookId,
+      userId,
+      solveQuizBookDTO,
+      quizBook.quizCount,
+    );
+
+    if (solveQuizBookDTO.isCorrect) {
+      await this.userSerive.increaseUserPoint(userId);
+    }
+
+    return new SolveResultQuizBookDTO(solvedQuizBook);
   }
 
   async getQuizBookOwnedByUSer(userId: number, isDone: boolean) {

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   ConflictException,
+  NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
@@ -10,6 +11,7 @@ import { UserEntity } from 'src/entity/user.entity';
 import CreateUserDTO from './dto/create-user.dto';
 import { UserResponseDTO } from './dto/user-response.dto';
 import { SSORequestDTO } from './dto/sso-request.dto';
+import CreateUserRequestDTO from './dto/user-request.dto';
 
 @Injectable()
 export class UserService {
@@ -28,8 +30,22 @@ export class UserService {
     return allUsers;
   }
 
-  async findByEmail(email: string) {
-    const user = await this.userRepository.findOne({
+
+  async findUserById(id: number): Promise<UserEntity> {
+    const user = await this.UserRepository.findOne({
+      id,
+    });
+    if (!user) {
+      throw new NotFoundException('잘못된 회원정보입니다.');
+    }
+    return user;
+  }
+
+  async findUserByEmail(email: string): Promise<UserResponseDTO> {
+    const user = await this.UserRepository.findOne({
+
+//   async findByEmail(email: string) {
+//     const user = await this.userRepository.findOne({
       where: {
         email: email,
       },
@@ -38,13 +54,10 @@ export class UserService {
     return user;
   }
 
-  async createUser(user: CreateUserDTO): Promise<UserResponseDTO> {
-    // const kuDomain = req.user.email.indexOf('@korea.ac.kr');
-    // if (kuDomain > -1) {
-    //   // true: ku member -> but how to know whether kucc member?
-    // }
+  async createUser(user: CreateUserRequestDTO): Promise<UserResponseDTO> {
     const newUser = this.userRepository.create(user);
     await this.userRepository.save(newUser).catch(() => {
+
       throw new BadRequestException('잘못된 요청입니다.');
     });
 
@@ -92,5 +105,10 @@ export class UserService {
     (SELECT COUNT(*)+1 FROM user WHERE point > u.point ) AS rank FROM user AS u WHERE id=${userid}`);
 
     return rank[0];
+  }
+
+  async increaseUserPoint(userId: number) {
+    const user = await this.findUserById(userId);
+    await this.UserRepository.increment(user, 'point', 30);
   }
 }

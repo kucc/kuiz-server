@@ -39,17 +39,17 @@ export class QuizBookEntity {
   @Column({ type: 'tinyint', default: false })
   completed: boolean;
 
-  @ManyToOne((type) => CategoryEntity, (category) => category.quizBooks)
-  @JoinColumn({ name: 'categoryId', referencedColumnName: 'id' })
-  category: CategoryEntity;
-
-  @ManyToOne((type) => UserEntity, (user) => user.quizBooks)
-  @JoinColumn({ name: 'ownerId', referencedColumnName: 'id' })
   @Column({ type: 'int', nullable: false })
   categoryId: number;
 
   @Column({ type: 'int', nullable: false })
   ownerId: number;
+
+  @ManyToOne((type) => CategoryEntity, (category) => category.quizBooks, {
+    nullable: false,
+  })
+  @JoinColumn({ name: 'categoryId', referencedColumnName: 'id' })
+  category: CategoryEntity;
 
   @ManyToOne((type) => UserEntity, (user) => user.quizBooks, {
     nullable: false,
@@ -57,7 +57,7 @@ export class QuizBookEntity {
   @JoinColumn({ name: 'ownerId', referencedColumnName: 'id' })
   owner: UserEntity;
 
-  @OneToMany(() => QuizEntity, (quiz) => quiz.quizBookId)
+  @OneToMany((type) => QuizEntity, (quiz) => quiz.quizBook)
   quizs: QuizEntity[];
 
   @OneToMany((type) => UserSolveQuizBookEntity, (solve) => solve.quizBook)
