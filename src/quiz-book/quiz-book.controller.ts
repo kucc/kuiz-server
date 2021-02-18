@@ -12,8 +12,9 @@ import {
   forwardRef,
   Inject,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { request, Request } from 'express';
+import { Request } from 'express';
 
 import { QuizBookService } from './quiz-book.service';
 import { UserGuard } from '../common/guards/user.guard';
@@ -28,6 +29,8 @@ import { QuizService } from 'src/quiz/quiz.service';
 import { QuizResponseDTO } from 'src/quiz/dto/quiz-response.dto';
 import CreateQuizRequestDTO from 'src/quiz/dto/create-quiz-request.dto';
 import { StorageService } from 'src/storage/storage.service';
+import { SolveQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-request.dto';
+import { SolveResultQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-response.dto';
 
 @Controller('quiz-book')
 export class QuizBookController {
@@ -38,6 +41,36 @@ export class QuizBookController {
     private readonly quizService: QuizService,
     private readonly storageService: StorageService,
   ) {}
+
+  @Get('solving')
+  @UseGuards(new UserGuard())
+  async getQuizBookSolvedByUser(
+    @Req() request: Request,
+    @Query('isDone') isDone: boolean,
+  ) {
+    const { user } = request;
+    const quizBookList = await this.quizBookService.getQuizBookSolvedByUser(
+      user.id,
+      isDone,
+    );
+
+    return quizBookList;
+  }
+
+  @Get('owner')
+  @UseGuards(new UserGuard())
+  async getQuizBookOwnedByUSer(
+    @Req() request: Request,
+    @Query('isDone') isDone: boolean,
+  ) {
+    const { user } = request;
+    const quizBookList = await this.quizBookService.getQuizBookOwnedByUSer(
+      user.id,
+      isDone,
+    );
+
+    return quizBookList;
+  }
 
   @Get(':id')
   async getQuizOfOrder(
@@ -131,10 +164,18 @@ export class QuizBookController {
     return new LikeQuizBookResponseDTO(likedQuizBook);
   }
 
-  // TODO
   @Post(':id/solve')
-  async solveQuiz(@Param('id') id: number) {
+  @UseGuards(new UserGuard())
+  async solveQuizBook(
+    @Req() request: Request,
+    @Param('id') quizBookId: number,
+    @Body() solveQuizBookDTO: SolveQuizBookDTO,
+  ): Promise<SolveResultQuizBookDTO> {
     const userId = request.user.id;
-    await this.quizBookService.solveQuiz(id, userId);
+    return await this.quizBookService.solveQuizBook(
+      quizBookId,
+      userId,
+      solveQuizBookDTO,
+    );
   }
 }

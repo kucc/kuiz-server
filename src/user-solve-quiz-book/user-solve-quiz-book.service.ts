@@ -1,6 +1,8 @@
+import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+
+import { SolveQuizBookDTO } from './dto/user-solve-quiz-book-request.dto';
 import { UserSolveQuizBookEntity } from '../entity/user-solve-quiz-book.entity';
 
 @Injectable()
@@ -10,41 +12,66 @@ export class UserSolveQuizBookService {
     private readonly userSolveQuizBookRepository: Repository<UserSolveQuizBookEntity>,
   ) {}
 
-  async findbyQBIdandUserId(quizBookId: number, userId: number) {
-    return await this.userSolveQuizBookRepository.findOne({
+  async findandCreatebyQBIdandUserId(
+    quizBookId: number,
+    userId: number,
+  ): Promise<UserSolveQuizBookEntity> {
+    const solvedQuizBook = await this.userSolveQuizBookRepository.findOne({
       where: {
         quizBookId,
         userId,
       },
     });
-  }
 
-  async createUserSolveQuizBook(
-    quizBookId: number,
-    userId: number,
-  ): Promise<UserSolveQuizBookEntity> {
-    const newUSQB = this.userSolveQuizBookRepository.create({
-      quizBookId,
-      userId,
-    });
-    await this.userSolveQuizBookRepository.save(newUSQB);
-
-    return newUSQB;
+    if (!solvedQuizBook) {
+      const newUSQB = this.userSolveQuizBookRepository.create({
+        quizBookId,
+        userId,
+      });
+      await this.userSolveQuizBookRepository.save(newUSQB);
+      return newUSQB;
+    }
+    return solvedQuizBook;
   }
 
   async toggleQuizBookLikes(
     quizBookId: number,
     userId: number,
   ): Promise<boolean> {
-    let solvedQuizBook = await this.findbyQBIdandUserId(quizBookId, userId);
-
-    if (!solvedQuizBook) {
-      solvedQuizBook = await this.createUserSolveQuizBook(quizBookId, userId); // solve APId에서 create되면 지워도됨
-    }
+    const solvedQuizBook = await this.findandCreatebyQBIdandUserId(
+      quizBookId,
+      userId,
+    );
 
     solvedQuizBook.liked = !solvedQuizBook.liked;
     await this.userSolveQuizBookRepository.save(solvedQuizBook);
 
     return solvedQuizBook.liked;
+  }
+
+  async isLastQuiz(quizOrder: number, quizCount: number): Promise<boolean> {
+    if (quizOrder === quizCount - 1) {
+      return true;
+    }
+    return false;
+  }
+
+  async solveQuizBook(
+    quizBookId: number,
+    userId: number,
+    solvedQuizBookDTO: SolveQuizBookDTO,
+    quizCount: number,
+  ): Promise<UserSolveQuizBookEntity> {
+    const solvedQuizBook = await this.findandCreatebyQBIdandUserId(
+      quizBookId,
+      userId,
+    );
+    solvedQuizBook.savedQuizId = solvedQuizBookDTO.quizId;
+    if (this.isLastQuiz(solvedQuizBookDTO.quizOrder, quizCount)) {
+      solvedQuizBook.completed = true;
+    }
+
+    await this.userSolveQuizBookRepository.save(solvedQuizBook);
+    return solvedQuizBook;
   }
 }

@@ -1,7 +1,15 @@
-import { QuizBookEntity } from "../../entity/quiz-book.entity";
+import { QuizBookEntity } from '../../entity/quiz-book.entity';
 
-export class QuizBookResponseDTO{
-  constructor(quizBook: QuizBookEntity){
+export class QuizBookListResponseDTO {
+  constructor(quizBooks: QuizBookEntity[], count: number) {
+    this.count = count;
+    this.data = quizBooks.map((quizBook) => new QuizBookResponseDTO(quizBook));
+  }
+  readonly count: number;
+  readonly data: object;
+}
+export class QuizBookResponseDTO {
+  constructor(quizBook: QuizBookEntity) {
     this.id = quizBook.id;
     this.title = quizBook.title;
     this.ownerName = quizBook.ownerName;
@@ -17,8 +25,8 @@ export class QuizBookResponseDTO{
   readonly ownerId: number;
 }
 
-export class EditQuizBookResponseDTO{
-  constructor(quizBook: QuizBookEntity){
+export class EditQuizBookResponseDTO {
+  constructor(quizBook: QuizBookEntity) {
     this.id = quizBook.id;
     this.title = quizBook.title;
     this.categoryId = quizBook.categoryId;
@@ -28,8 +36,8 @@ export class EditQuizBookResponseDTO{
   readonly categoryId: number;
 }
 
-export class LikeQuizBookResponseDTO{
-  constructor(quizBook: QuizBookEntity){
+export class LikeQuizBookResponseDTO {
+  constructor(quizBook: QuizBookEntity) {
     this.id = quizBook.id;
     this.likedCount = quizBook.likedCount;
   }

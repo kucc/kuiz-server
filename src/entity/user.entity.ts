@@ -31,7 +31,7 @@ export class UserEntity {
 
   @Column({
     type: 'int',
-    default: 0,
+    default: 1,
   })
   level: number;
 
@@ -41,7 +41,7 @@ export class UserEntity {
   })
   isMember: boolean;
 
-  @OneToMany((type) => QuizBookEntity, (quizBook) => quizBook.ownerId)
+  @OneToMany((type) => QuizBookEntity, (quizBook) => quizBook.owner)
   quizBooks: QuizBookEntity[];
 
   @OneToMany((type) => UserSolveQuizBookEntity, (solve) => solve.quizBook)
