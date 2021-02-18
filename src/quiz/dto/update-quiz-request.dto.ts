@@ -20,7 +20,7 @@ export default class UpdateQuizRequestDTO {
   public readonly option4: string;
 
   @IsString()
-  public readonly imageURL: string;
+  public imageURL: string;
 
   @IsString()
   public readonly description: string;
