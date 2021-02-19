@@ -5,13 +5,9 @@ import {
   Param,
   Patch,
   Req,
-  UnauthorizedException,
   UseGuards,
-  Inject,
-  forwardRef,
 } from '@nestjs/common';
 import { MemberGuard } from 'src/common/guards/member.guard';
-import { QuizBookService } from 'src/quiz-book/quiz-book.service';
 import UpdateQuizRequestDTO from './dto/update-quiz-request.dto';
 import { QuizService } from './quiz.service';
 import { StorageService } from 'src/storage/storage.service';
@@ -20,9 +16,6 @@ import { StorageService } from 'src/storage/storage.service';
 export class QuizController {
   constructor(
     private readonly quizService: QuizService,
-
-    @Inject(forwardRef(() => QuizBookService))
-    private readonly quizBookService: QuizBookService,
     private readonly storageService: StorageService,
   ) {}
 
@@ -33,21 +26,19 @@ export class QuizController {
     @Param('quizId') quizId: number,
     @Body() requestDTO: UpdateQuizRequestDTO,
   ) {
+    const userId = request.user.id;
     const quiz = await this.quizService.findById(quizId);
-    const quizBook = await this.quizBookService.findQuizBookbyId(
-      quiz.quizBookId,
-    );
-
-    if (quizBook.ownerId !== request.user.id) {
-      throw new UnauthorizedException('권한이 없습니다.');
-    }
 
     if (request.files) {
       const quizImageURL = await this.storageService.upload(request);
       requestDTO.imageURL = quizImageURL;
     }
 
-    const updatedQuiz = await this.quizService.updateQuiz(quiz, requestDTO);
+    const updatedQuiz = await this.quizService.updateQuiz(
+      userId,
+      quiz,
+      requestDTO,
+    );
 
     return updatedQuiz;
   }

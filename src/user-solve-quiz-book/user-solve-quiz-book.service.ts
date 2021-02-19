@@ -4,12 +4,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { SolveQuizBookDTO } from './dto/user-solve-quiz-book-request.dto';
 import { UserSolveQuizBookEntity } from '../entity/user-solve-quiz-book.entity';
+import { QuizBookEntity } from 'src/entity/quiz-book.entity';
 
 @Injectable()
 export class UserSolveQuizBookService {
   constructor(
     @InjectRepository(UserSolveQuizBookEntity)
     private readonly userSolveQuizBookRepository: Repository<UserSolveQuizBookEntity>,
+    @InjectRepository(QuizBookEntity)
+    private readonly quizBookRepository: Repository<QuizBookEntity>,
   ) {}
 
   async findandCreatebyQBIdandUserId(
@@ -49,11 +52,16 @@ export class UserSolveQuizBookService {
     return solvedQuizBook.liked;
   }
 
-  async isLastQuiz(quizOrder: number, quizCount: number): Promise<boolean> {
-    if (quizOrder >= quizCount) {
-      // TODO: relogic
+  async checkIsLastQuiz(
+    quizBookId: number,
+    solvedQuizId: number,
+  ): Promise<boolean> {
+    const quizBook = await this.quizBookRepository.findOne({ id: quizBookId });
+
+    if (solvedQuizId === quizBook.lastQuizId) {
       return true;
     }
+
     return false;
   }
 
@@ -61,17 +69,18 @@ export class UserSolveQuizBookService {
     quizBookId: number,
     userId: number,
     solvedQuizBookDTO: SolveQuizBookDTO,
-    quizCount: number,
   ): Promise<UserSolveQuizBookEntity> {
     const solvedQuizBook = await this.findandCreatebyQBIdandUserId(
       quizBookId,
       userId,
     );
     solvedQuizBook.savedQuizId = solvedQuizBookDTO.quizId;
-    const isLastQuiz = await this.isLastQuiz(
-      solvedQuizBookDTO.quizOrder,
-      quizCount,
+
+    const isLastQuiz = await this.checkIsLastQuiz(
+      solvedQuizBook.quizBookId,
+      solvedQuizBookDTO.quizId,
     );
+
     if (isLastQuiz) {
       solvedQuizBook.completed = true;
     }
