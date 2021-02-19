@@ -106,6 +106,7 @@ export class QuizBookController {
     @Param('id') id: number,
     @Body() newQuizDTO: CreateQuizRequestDTO,
   ): Promise<QuizResponseDTO> {
+    newQuizDTO.quizBookId = id;
     if (request.files) {
       const quizImageURL = await this.storageService.upload(request);
       newQuizDTO.imageURL = quizImageURL;
