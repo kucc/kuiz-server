@@ -106,15 +106,11 @@ export class QuizBookController {
     @Param('id') id: number,
     @Body() newQuizDTO: CreateQuizRequestDTO,
   ): Promise<QuizResponseDTO> {
-    await this.quizBookService.findQuizBookbyId(id);
-    newQuizDTO.quizBookId = id;
-
     if (request.files) {
       const quizImageURL = await this.storageService.upload(request);
       newQuizDTO.imageURL = quizImageURL;
     }
 
-    //TODO: quiz 추가시 quizBook count update
     const newQuiz = await this.quizService.createQuiz(newQuizDTO);
 
     return new QuizResponseDTO(newQuiz);
@@ -171,6 +167,7 @@ export class QuizBookController {
     @Body() solveQuizBookDTO: SolveQuizBookDTO,
   ): Promise<SolveResultQuizBookDTO> {
     const userId = request.user.id;
+
     return await this.quizBookService.solveQuizBook(
       quizBookId,
       userId,

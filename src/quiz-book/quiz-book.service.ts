@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -98,7 +99,6 @@ export class QuizBookService {
     userId: number,
   ): Promise<QuizBookEntity> {
     const quizBook = await this.findQuizBookbyId(quizBookId);
-
     await this.checkAuthorization(quizBook.ownerId, userId);
 
     const editedQuizBook = this.quizBookRepository.merge(quizBook, quizbookDTO);
@@ -124,6 +124,26 @@ export class QuizBookService {
     }
 
     return await this.quizBookRepository.save(quizBook);
+  }
+
+  async increaseQuizCount(quizBookId: number) {
+    await this.quizBookRepository
+      .query('UPDATE quizBook SET quizCount = quizCount + 1 where id = ?', [
+        quizBookId,
+      ])
+      .catch(() => {
+        throw new BadRequestException('잘못된 요청입니다.');
+      });
+  }
+
+  async decreaseQuizCount(quizBookId: number) {
+    await this.quizBookRepository
+      .query('UPDATE quizBook SET quizCount = quizCount - 1 where id = ?', [
+        quizBookId,
+      ])
+      .catch(() => {
+        throw new BadRequestException('잘못된 요청입니다.');
+      });
   }
 
   async solveQuizBook(

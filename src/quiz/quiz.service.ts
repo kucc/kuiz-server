@@ -42,12 +42,12 @@ export class QuizService {
 
   async createQuiz(quiz: CreateQuizRequestDTO): Promise<QuizEntity> {
     const newQuiz = this.QuizRepository.create(quiz);
-
     await this.QuizRepository.save(newQuiz).catch(() => {
       throw new BadRequestException(
         '잘못된 요청입니다. 필수 영역을 모두 입력해주세요.',
       );
     });
+    await this.quizBookService.increaseQuizCount(newQuiz.quizBookId);
 
     return newQuiz;
   }
@@ -76,6 +76,7 @@ export class QuizService {
     await this.QuizRepository.delete(quiz).catch(() => {
       throw new BadRequestException('잘못된 요청입니다.');
     });
+    await this.quizBookService.decreaseQuizCount(quiz.quizBookId);
 
     return { result: true };
   }
