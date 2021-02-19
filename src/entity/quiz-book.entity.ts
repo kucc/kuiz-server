@@ -45,6 +45,9 @@ export class QuizBookEntity {
   @Column({ type: 'int', nullable: false })
   ownerId: number;
 
+  @Column({ type: 'int' })
+  lastQuizId: number;
+
   @ManyToOne((type) => CategoryEntity, (category) => category.quizBooks, {
     nullable: false,
   })

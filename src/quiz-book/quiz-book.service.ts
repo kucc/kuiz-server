@@ -151,13 +151,10 @@ export class QuizBookService {
     userId: number,
     solveQuizBookDTO: SolveQuizBookDTO,
   ): Promise<SolveResultQuizBookDTO> {
-    const quizBook = await this.findQuizBookbyId(quizBookId);
-
     const solvedQuizBook = await this.userSolveQuizBookService.solveQuizBook(
       quizBookId,
       userId,
       solveQuizBookDTO,
-      quizBook.quizCount,
     );
 
     if (solveQuizBookDTO.isCorrect) {
