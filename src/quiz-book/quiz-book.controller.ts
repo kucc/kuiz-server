@@ -83,6 +83,19 @@ export class QuizBookController {
     return new QuizResponseDTO(quizOfOrder);
   }
 
+  @Get('')
+  async getQuizBookList(
+    @Query('categoryId') categoryId: number,
+    @Query('page') page: number,
+  ) {
+    const quizBookList = await this.quizBookService.findAllQuizBookByCategory(
+      categoryId,
+      page,
+    );
+
+    return quizBookList;
+  }
+
   @Post(':quizBookId/solve')
   @UseGuards(new UserGuard())
   async solveQuizBook(
