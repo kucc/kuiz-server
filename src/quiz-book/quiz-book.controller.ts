@@ -70,17 +70,51 @@ export class QuizBookController {
     return quizBookList;
   }
 
-  @Get(':id/quiz')
+  @Get(':quizBookId/quiz')
   async getQuizOfOrder(
     @Query() query: { order: number },
-    @Param('id') id: number,
+    @Param('quizBookId') quizBookId: number,
   ): Promise<QuizResponseDTO> {
     const quizOfOrder = await this.quizService.findByQuizBookIdAndOrder(
-      id,
+      quizBookId,
       query.order,
     );
 
     return new QuizResponseDTO(quizOfOrder);
+  }
+
+  @Post(':quizBookId/solve')
+  @UseGuards(new UserGuard())
+  async solveQuizBook(
+    @Req() request: Request,
+    @Param('quizBookId') quizBookId: number,
+    @Body() solveQuizBookDTO: SolveQuizBookDTO,
+  ): Promise<SolveResultQuizBookDTO> {
+    const userId = request.user.id;
+
+    return await this.quizBookService.solveQuizBook(
+      quizBookId,
+      userId,
+      solveQuizBookDTO,
+    );
+  }
+
+  @Post(':quizBookId/quiz')
+  @UseGuards(new MemberGuard())
+  async createQuiz(
+    @Req() request: Request,
+    @Param('quizBookId') quizBookId: number,
+    @Body() newQuizDTO: CreateQuizRequestDTO,
+  ): Promise<QuizResponseDTO> {
+    newQuizDTO.quizBookId = quizBookId;
+    if (request.files) {
+      const quizImageURL = await this.storageService.upload(request);
+      newQuizDTO.imageURL = quizImageURL;
+    }
+
+    const newQuiz = await this.quizService.createQuiz(newQuizDTO);
+
+    return new QuizResponseDTO(newQuiz);
   }
 
   @Post()
@@ -99,40 +133,37 @@ export class QuizBookController {
     return new QuizBookResponseDTO(newQuizBook);
   }
 
-  @Post(':id/quiz')
-  @UseGuards(new MemberGuard())
-  async createQuiz(
-    @Req() request: Request,
-    @Param('id') id: number,
-    @Body() newQuizDTO: CreateQuizRequestDTO,
-  ): Promise<QuizResponseDTO> {
-    newQuizDTO.quizBookId = id;
-    if (request.files) {
-      const quizImageURL = await this.storageService.upload(request);
-      newQuizDTO.imageURL = quizImageURL;
-    }
-
-    const newQuiz = await this.quizService.createQuiz(newQuizDTO);
-
-    return new QuizResponseDTO(newQuiz);
-  }
-
-  @Delete(':id')
+  @Delete(':quizBookId')
   @UseGuards(new MemberGuard())
   async deleteQuizBook(
     @Req() request: Request,
-    @Param('id') quizBookId: number,
+    @Param('quizBookId') quizBookId: number,
   ): Promise<{ result: boolean }> {
     const userId = request.user.id;
 
     return await this.quizBookService.deleteQuizBook(quizBookId, userId);
   }
 
-  @Patch(':id')
+  @Patch(':quizBookId/like')
+  @UseGuards(new UserGuard())
+  async updateQuizBookLikes(
+    @Req() request: Request,
+    @Param('quizBookId') quizBookId: number,
+  ): Promise<LikeQuizBookResponseDTO> {
+    const userId = request.user.id;
+    const likedQuizBook = await this.quizBookService.updateQuizBookLikes(
+      quizBookId,
+      userId,
+    );
+
+    return new LikeQuizBookResponseDTO(likedQuizBook);
+  }
+
+  @Patch(':quizBookId')
   @UseGuards(new MemberGuard())
   async editQuizBookInfo(
     @Req() request: Request,
-    @Param('id') quizBookId: number,
+    @Param('quizBookId') quizBookId: number,
     @Body() quizBookDTO: EditQuizBookDTO,
   ): Promise<EditQuizBookResponseDTO> {
     const userId = request.user.id;
@@ -143,36 +174,5 @@ export class QuizBookController {
     );
 
     return new EditQuizBookResponseDTO(editedQuizBook);
-  }
-
-  @Patch(':id/like')
-  @UseGuards(new UserGuard())
-  async updateQuizBookLikes(
-    @Req() request: Request,
-    @Param('id') id: number,
-  ): Promise<LikeQuizBookResponseDTO> {
-    const userId = request.user.id;
-    const likedQuizBook = await this.quizBookService.updateQuizBookLikes(
-      id,
-      userId,
-    );
-
-    return new LikeQuizBookResponseDTO(likedQuizBook);
-  }
-
-  @Post(':id/solve')
-  @UseGuards(new UserGuard())
-  async solveQuizBook(
-    @Req() request: Request,
-    @Param('id') quizBookId: number,
-    @Body() solveQuizBookDTO: SolveQuizBookDTO,
-  ): Promise<SolveResultQuizBookDTO> {
-    const userId = request.user.id;
-
-    return await this.quizBookService.solveQuizBook(
-      quizBookId,
-      userId,
-      solveQuizBookDTO,
-    );
   }
 }
