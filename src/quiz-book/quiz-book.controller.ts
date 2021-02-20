@@ -70,17 +70,13 @@ export class QuizBookController {
     return quizBookList;
   }
 
-  @Get(':quizBookId/quiz')
-  async getQuizOfOrder(
-    @Query() query: { order: number },
-    @Param('quizBookId') quizBookId: number,
-  ): Promise<QuizResponseDTO> {
-    const quizOfOrder = await this.quizService.findByQuizBookIdAndOrder(
-      quizBookId,
-      query.order,
-    );
+  @Get(':id/quiz')
+  async getAllQuizBookQuiz(
+    @Param('id') id: number,
+  ): Promise<QuizResponseDTO[]> {
+    const quizzes = await this.quizService.findAllByQuizBookId(id);
 
-    return new QuizResponseDTO(quizOfOrder);
+    return quizzes;
   }
 
   @Get('')
