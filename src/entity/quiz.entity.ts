@@ -22,9 +22,6 @@ export class QuizEntity {
   @Column({ type: 'text', nullable: false })
   imageURL: string;
 
-  @Column({ type: 'int', default: 0 })
-  order: number;
-
   @Column({ type: 'text', nullable: true })
   option1: string;
 

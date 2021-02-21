@@ -5,7 +5,6 @@ export class QuizResponseDTO {
     this.id = quiz.id;
     this.quizBookId = quiz.quizBookId;
     this.question = quiz.question;
-    this.order = quiz.order;
     this.answer = quiz.answer;
     this.imageURL = quiz.imageURL;
     this.option1 = quiz.option1;
@@ -18,7 +17,6 @@ export class QuizResponseDTO {
   public readonly id: number;
   public readonly quizBookId: number;
   public readonly question: string;
-  public readonly order: number;
   public readonly answer: string;
   public readonly imageURL: string;
   public readonly option1: string;
