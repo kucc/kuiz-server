@@ -78,6 +78,8 @@ export class QuizBookService {
     const quizBook = this.quizBookRepository.create(quizbookDTO);
     await this.quizBookRepository.save(quizBook);
 
+    await this.userSerive.increaseUserPoint(userId, 100);
+
     return quizBook;
   }
 
@@ -157,7 +159,7 @@ export class QuizBookService {
     );
 
     if (solveQuizBookDTO.isCorrect) {
-      await this.userSerive.increaseUserPoint(userId);
+      await this.userSerive.increaseUserPoint(userId, 30);
     }
 
     return new SolveResultQuizBookDTO(solvedQuizBook);

@@ -101,8 +101,8 @@ export class UserService {
     return rank[0];
   }
 
-  async increaseUserPoint(userId: number) {
+  async increaseUserPoint(userId: number, point: number) {
     const user = await this.findUserById(userId);
-    await this.userRepository.increment(user, 'point', 30);
+    await this.userRepository.increment(user, 'point', point);
   }
 }
