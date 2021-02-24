@@ -11,6 +11,8 @@ import {
   UseGuards,
   forwardRef,
   Inject,
+  DefaultValuePipe,
+  ParseBoolPipe,
 } from '@nestjs/common';
 import { Request } from 'express';
 
@@ -83,10 +85,13 @@ export class QuizBookController {
   async getQuizBookList(
     @Query('categoryId') categoryId: number,
     @Query('page') page: number,
+    @Query('isSortByDate', new DefaultValuePipe(false), ParseBoolPipe)
+    isSortByDate: boolean,
   ) {
     const quizBookList = await this.quizBookService.findAllQuizBookByCategory(
       categoryId,
       page,
+      isSortByDate,
     );
 
     return quizBookList;

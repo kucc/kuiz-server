@@ -101,8 +101,29 @@ export class UserService {
     return rank[0];
   }
 
-  async increaseUserPoint(userId: number) {
+  async increaseUserPoint(userId: number, point: number) {
     const user = await this.findUserById(userId);
-    await this.userRepository.increment(user, 'point', 30);
+    const increasedPoint = user.point + point;
+
+    // level up.. relogic?
+    let level = 1;
+    switch (true) {
+      case increasedPoint >= 3000:
+        level = 5;
+        break;
+      case increasedPoint >= 1500:
+        level = 4;
+        break;
+      case increasedPoint >= 600:
+        level = 3;
+        break;
+      case increasedPoint >= 150:
+        level = 2;
+        break;
+      default:
+        break;
+    }
+
+    await this.userRepository.update(user, { point: increasedPoint, level });
   }
 }
