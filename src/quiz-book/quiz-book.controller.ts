@@ -172,7 +172,7 @@ export class QuizBookController {
       userId,
     );
 
-    return new LikeQuizBookResponseDTO(likedQuizBook);
+    return likedQuizBook;
   }
 
   @Patch(':quizBookId')

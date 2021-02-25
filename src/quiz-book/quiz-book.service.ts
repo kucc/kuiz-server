@@ -131,7 +131,6 @@ export class QuizBookService {
     } else {
       quizBook.likedCount -= 1;
     }
-
     return await this.quizBookRepository.save(quizBook);
   }
 
