@@ -119,4 +119,10 @@ export class AuthController {
     setAccessTokenCookie(response, accessToken);
     response.redirect(process.env.CLIENT_URL, 301);
   }
+
+  @Get('logout')
+  async logout(@Res() response: Response) {
+    setAccessTokenCookie(response, '');
+    response.redirect(process.env.CLIENT_URL, 301);
+  }
 }
