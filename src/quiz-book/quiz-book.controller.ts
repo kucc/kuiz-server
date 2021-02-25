@@ -46,7 +46,8 @@ export class QuizBookController {
   @UseGuards(new UserGuard())
   async getQuizBookSolvedByUser(
     @Req() request: Request,
-    @Query('isDone') isDone: boolean,
+    @Query('isDone', new DefaultValuePipe(false), ParseBoolPipe)
+    isDone: boolean,
   ) {
     const { user } = request;
     const quizBookList = await this.quizBookService.getQuizBookSolvedByUser(
@@ -61,7 +62,8 @@ export class QuizBookController {
   @UseGuards(new UserGuard())
   async getQuizBookOwnedByUSer(
     @Req() request: Request,
-    @Query('isDone') isDone: boolean,
+    @Query('isDone', new DefaultValuePipe(false), ParseBoolPipe)
+    isDone: boolean,
   ) {
     const { user } = request;
     const quizBookList = await this.quizBookService.getQuizBookOwnedByUSer(
