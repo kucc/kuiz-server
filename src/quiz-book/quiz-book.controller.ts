@@ -16,19 +16,20 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 
-import { QuizBookService } from './quiz-book.service';
-import { UserGuard } from '../common/guards/user.guard';
-import { MemberGuard } from '../common/guards/member.guard';
-import { CreateQuizBookDTO, EditQuizBookDTO } from './dto/quizbook-request.dto';
 import {
   QuizBookResponseDTO,
   EditQuizBookResponseDTO,
   LikeQuizBookResponseDTO,
+  QuizBookListResponseDTO,
 } from './dto/quizbook-response.dto';
 import { QuizService } from 'src/quiz/quiz.service';
+import { QuizBookService } from './quiz-book.service';
+import { UserGuard } from '../common/guards/user.guard';
+import { MemberGuard } from '../common/guards/member.guard';
+import { StorageService } from 'src/storage/storage.service';
 import { QuizResponseDTO } from 'src/quiz/dto/quiz-response.dto';
 import CreateQuizRequestDTO from 'src/quiz/dto/create-quiz-request.dto';
-import { StorageService } from 'src/storage/storage.service';
+import { CreateQuizBookDTO, EditQuizBookDTO } from './dto/quizbook-request.dto';
 import { SolveQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-request.dto';
 import { SolveResultQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-response.dto';
 
@@ -41,6 +42,19 @@ export class QuizBookController {
     private readonly quizService: QuizService,
     private readonly storageService: StorageService,
   ) {}
+
+  @Get('search')
+  //@UseGuards(new UserGuard())
+  async searchQuizBookListByKeyword(
+    @Query('categoryId') categoryId: number,
+    @Query('keyword') keyword: string,
+  ) {
+    const quizBookList = await this.quizBookService.searchQuizBookListByKeyword(
+      categoryId,
+      keyword,
+    );
+    return quizBookList;
+  }
 
   @Get('solving')
   @UseGuards(new UserGuard())
