@@ -183,12 +183,16 @@ export class QuizBookService {
   }
 
   async getQuizBookSolvedByUser(userId: number, isDone: boolean) {
-    const quizBookList = await this.userSolveQuizBookRespository.find({
+    const userSolveQuizBookList = await this.userSolveQuizBookRespository.find({
       relations: ['quizBook'],
       where: {
         userId,
         completed: isDone,
       },
+    });
+
+    const quizBookList = userSolveQuizBookList.map((entity) => {
+      return entity.quizBook;
     });
 
     return quizBookList;
