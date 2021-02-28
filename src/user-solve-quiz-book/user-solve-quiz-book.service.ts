@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { SolveQuizBookDTO } from './dto/user-solve-quiz-book-request.dto';
@@ -45,6 +45,10 @@ export class UserSolveQuizBookService {
       quizBookId,
       userId,
     );
+
+    if (!solvedQuizBook.completed) {
+      throw new BadRequestException('user does not solve quizbook');
+    }
 
     solvedQuizBook.liked = !solvedQuizBook.liked;
     await this.userSolveQuizBookRepository.save(solvedQuizBook);
