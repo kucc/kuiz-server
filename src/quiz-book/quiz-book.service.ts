@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { Repository, Like, getConnection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   BadRequestException,
@@ -15,6 +15,7 @@ import { UserSolveQuizBookService } from '../user-solve-quiz-book/user-solve-qui
 import { SolveQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-request.dto';
 import { SolveResultQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-response.dto';
 import { UserSolveQuizBookEntity } from 'src/entity/user-solve-quiz-book.entity';
+import { PaginationOptionsInterface } from '../common/pagination.options.interface';
 
 @Injectable()
 export class QuizBookService {
@@ -28,6 +29,19 @@ export class QuizBookService {
     private readonly userSolveQuizBookService: UserSolveQuizBookService,
     private readonly userSerive: UserService,
   ) {}
+
+  async searchQuizBookListByKeyword(
+    categoryId: number,
+    kw: string,
+    //options: PaginationOptionsInterface,
+  ): Promise<QuizBookEntity[]> {
+    const connection = getConnection(); //확인
+    const quizbookList = await connection.getRepository(QuizBookEntity).find({
+      title: Like(`%${kw}%`),
+      categoryId,
+    });
+    return quizbookList;
+  }
   async findQuizBookbyId(id: number): Promise<QuizBookEntity> {
     const quizBook = await this.quizBookRepository.findOne({ id });
 
