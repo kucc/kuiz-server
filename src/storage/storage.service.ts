@@ -19,6 +19,7 @@ export class StorageService {
     const params = {
       Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: req.files.image.name,
+      ContentType: 'image/jpeg',
       ACL: 'public-read',
       Body: req.files.image.data,
     };
