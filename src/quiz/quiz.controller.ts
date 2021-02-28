@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Req,
+  Get,
   UseGuards,
 } from '@nestjs/common';
 import { MemberGuard } from 'src/common/guards/member.guard';
@@ -18,6 +19,14 @@ export class QuizController {
     private readonly quizService: QuizService,
     private readonly storageService: StorageService,
   ) {}
+
+  @Get(':quizId')
+  @UseGuards(MemberGuard)
+  async getQuiz(@Req() request, @Param('quizId') quizId: number) {
+    const userId = request.user.id;
+
+    return await this.quizService.findByIdAndCheckOwner(quizId, userId);
+  }
 
   @Patch(':quizId')
   @UseGuards(MemberGuard)
