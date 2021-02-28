@@ -15,7 +15,6 @@ import { UserSolveQuizBookService } from '../user-solve-quiz-book/user-solve-qui
 import { SolveQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-request.dto';
 import { SolveResultQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-response.dto';
 import { UserSolveQuizBookEntity } from 'src/entity/user-solve-quiz-book.entity';
-import { PaginationOptionsInterface } from '../common/pagination.options.interface';
 
 @Injectable()
 export class QuizBookService {
