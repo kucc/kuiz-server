@@ -26,7 +26,7 @@ export class QuizBookService {
     private readonly userSolveQuizBookRespository: Repository<UserSolveQuizBookEntity>,
 
     private readonly userSolveQuizBookService: UserSolveQuizBookService,
-    private readonly userSerive: UserService,
+    private readonly userService: UserService,
   ) {}
 
   async searchQuizBookListByKeyword(
@@ -99,7 +99,7 @@ export class QuizBookService {
     const quizBook = this.quizBookRepository.create(quizbookDTO);
     await this.quizBookRepository.save(quizBook);
 
-    await this.userSerive.increaseUserPoint(userId, 100);
+    await this.userService.increaseUserPoint(userId, 100);
 
     return quizBook;
   }
@@ -178,10 +178,6 @@ export class QuizBookService {
       userId,
       solveQuizBookDTO,
     );
-
-    if (solveQuizBookDTO.isCorrect) {
-      await this.userSerive.increaseUserPoint(userId, 30);
-    }
 
     return new SolveResultQuizBookDTO(solvedQuizBook);
   }

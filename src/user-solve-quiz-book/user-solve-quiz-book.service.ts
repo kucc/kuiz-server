@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { SolveQuizBookDTO } from './dto/user-solve-quiz-book-request.dto';
 import { UserSolveQuizBookEntity } from '../entity/user-solve-quiz-book.entity';
 import { QuizBookEntity } from 'src/entity/quiz-book.entity';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class UserSolveQuizBookService {
@@ -13,6 +14,7 @@ export class UserSolveQuizBookService {
     private readonly userSolveQuizBookRepository: Repository<UserSolveQuizBookEntity>,
     @InjectRepository(QuizBookEntity)
     private readonly quizBookRepository: Repository<QuizBookEntity>,
+    private readonly userService: UserService,
   ) {}
 
   async findandCreatebyQBIdandUserId(
@@ -78,7 +80,14 @@ export class UserSolveQuizBookService {
       quizBookId,
       userId,
     );
-    solvedQuizBook.savedQuizId = solvedQuizBookDTO.quizId;
+
+    //첫 시도
+    if (solvedQuizBook.savedQuizId < solvedQuizBookDTO.quizId) {
+      if (solvedQuizBookDTO.isCorrect) {
+        await this.userService.increaseUserPoint(userId, 30);
+      }
+      solvedQuizBook.savedQuizId = solvedQuizBookDTO.quizId;
+    }
 
     const isLastQuiz = await this.checkIsLastQuiz(
       solvedQuizBook.quizBookId,
