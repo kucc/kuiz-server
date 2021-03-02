@@ -15,6 +15,7 @@ import { UserSolveQuizBookService } from '../user-solve-quiz-book/user-solve-qui
 import { SolveQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-request.dto';
 import { SolveResultQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-response.dto';
 import { UserSolveQuizBookEntity } from 'src/entity/user-solve-quiz-book.entity';
+import { QuizBookResponseDTO } from './dto/quizbook-response.dto';
 
 @Injectable()
 export class QuizBookService {
@@ -205,5 +206,17 @@ export class QuizBookService {
     });
 
     return quizBookList;
+  }
+
+  async getUnsolvedQuizBookByUser(
+    userId: number,
+  ): Promise<QuizBookResponseDTO[]> {
+    const unsolvedQuizBookList = await this.userSolveQuizBookRespository.query(
+      `SELECT * FROM quizBook WHERE id NOT IN 
+        ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ? )`,
+      [userId],
+    );
+
+    return unsolvedQuizBookList;
   }
 }

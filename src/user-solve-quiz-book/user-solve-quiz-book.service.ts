@@ -81,7 +81,6 @@ export class UserSolveQuizBookService {
       userId,
     );
 
-    //첫 시도
     if (solvedQuizBook.savedQuizId < solvedQuizBookDTO.quizId) {
       if (solvedQuizBookDTO.isCorrect) {
         await this.userService.increaseUserPoint(userId, 30);

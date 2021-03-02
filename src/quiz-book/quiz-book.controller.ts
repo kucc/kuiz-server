@@ -20,7 +20,6 @@ import {
   QuizBookResponseDTO,
   EditQuizBookResponseDTO,
   LikeQuizBookResponseDTO,
-  QuizBookListResponseDTO,
 } from './dto/quizbook-response.dto';
 import { QuizService } from 'src/quiz/quiz.service';
 import { QuizBookService } from './quiz-book.service';
@@ -111,6 +110,17 @@ export class QuizBookController {
     );
 
     return quizBookList;
+  }
+
+  @Get('unsolved')
+  @UseGuards(new UserGuard())
+  async getUnsolvedQuizBookByUser(@Req() request: Request) {
+    const { user } = request;
+    const unsolvedQuizBookList = await this.quizBookService.getUnsolvedQuizBookByUser(
+      user.id,
+    );
+
+    return unsolvedQuizBookList;
   }
 
   @Post(':quizBookId/solve')
