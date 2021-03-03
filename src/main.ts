@@ -17,7 +17,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(fileUpload());
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   await app.listen(process.env.SERVER_PORT);
 }
