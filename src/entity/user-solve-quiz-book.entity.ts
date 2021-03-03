@@ -14,10 +14,10 @@ export class UserSolveQuizBookEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'tinyint', default: false })
+  @Column({ type: 'tinyint', default: 0 })
   completed: boolean;
 
-  @Column({ type: 'tinyint', default: false })
+  @Column({ type: 'tinyint', default: 0 })
   liked: boolean;
 
   @Column({ type: 'int', default: -1 })
