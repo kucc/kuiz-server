@@ -15,7 +15,7 @@ import { UserSolveQuizBookService } from '../user-solve-quiz-book/user-solve-qui
 import { SolveQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-request.dto';
 import { SolveResultQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-response.dto';
 import { UserSolveQuizBookEntity } from 'src/entity/user-solve-quiz-book.entity';
-import { PaginationOptionsInterface } from '../common/pagination.options.interface';
+import { QuizBookwithLikedResponseDTO } from './dto/quizbook-response.dto';
 
 @Injectable()
 export class QuizBookService {
@@ -32,15 +32,27 @@ export class QuizBookService {
 
   async searchQuizBookListByKeyword(
     categoryId: number,
-    kw: string,
-    //options: PaginationOptionsInterface,
-  ): Promise<QuizBookEntity[]> {
-    const connection = getConnection(); //확인
-    const quizbookList = await connection.getRepository(QuizBookEntity).find({
-      title: Like(`%${kw}%`),
-      categoryId,
+    page: number,
+    keyword: string,
+    userId: number,
+  ): Promise<QuizBookwithLikedResponseDTO[]> {
+    const take = QUIZBOOKS_PER_PAGE;
+    const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+
+    const quizbookList = await this.quizBookRepository.query(
+      `select qb.id, qb.title, qb.ownerId, qb.createdAt, qb.ownerName,
+      qb.quizCount, qb.solvedCount, qb.likedCount, 
+      usq.liked 
+      from quizBook as qb join userSolveQuizBook as usq
+      on usq.quizBookId = qb.id
+      where usq.userId = ? and qb.categoryId = ? and qb.title like '%?%' 
+      limit ? offset ?`,
+      [userId, categoryId, keyword, take, skip],
+    );
+    const dto = quizbookList.map((entity) => {
+      return new QuizBookwithLikedResponseDTO(entity);
     });
-    return quizbookList;
+    return dto;
   }
   async findQuizBookbyId(id: number): Promise<QuizBookEntity> {
     const quizBook = await this.quizBookRepository.findOne({ id });
@@ -56,16 +68,21 @@ export class QuizBookService {
     categoryId: number,
     page: number,
     isSortByDate: boolean,
-  ): Promise<QuizBookEntity[]> {
+    userId: number,
+  ): Promise<QuizBookwithLikedResponseDTO[]> {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
-    const data = await this.quizBookRepository.find({
-      where: {
-        categoryId,
-      },
-      take,
-      skip,
-    });
+
+    const data = await this.quizBookRepository.query(
+      `select qb.id, qb.title, qb.ownerId, qb.createdAt, qb.ownerName,
+      qb.quizCount, qb.solvedCount, qb.likedCount, 
+      usq.liked 
+      from quizBook as qb join userSolveQuizBook as usq
+      on usq.quizBookId = qb.id
+      where usq.userId = ? and categoryId = ?
+      limit ? offset ?`,
+      [userId, categoryId, take, skip],
+    );
 
     if (!isSortByDate) {
       data.sort(
@@ -75,10 +92,14 @@ export class QuizBookService {
     }
 
     if (!data.length) {
-      throw new NotFoundException('페이지가 존재하지 않습니다.');
+      throw new NotFoundException('페이지가 존재하지 않습니다.'); // 바꾸기
     }
 
-    return data;
+    const dto = data.map((entity) => {
+      return new QuizBookwithLikedResponseDTO(entity);
+    });
+
+    return dto;
   }
 
   async checkAuthorization(ownerId: number, userId: number): Promise<boolean> {
@@ -133,7 +154,7 @@ export class QuizBookService {
   async updateQuizBookLikes(
     quizBookId: number,
     userId: number,
-  ): Promise<QuizBookEntity> {
+  ): Promise<[QuizBookEntity, boolean]> {
     const quizBook = await this.findQuizBookbyId(quizBookId);
     const isUserLiked = await this.userSolveQuizBookService.toggleQuizBookLikes(
       quizBookId,
@@ -145,8 +166,8 @@ export class QuizBookService {
     } else {
       quizBook.likedCount -= 1;
     }
-
-    return await this.quizBookRepository.save(quizBook);
+    const updatedQuizbook = await this.quizBookRepository.save(quizBook);
+    return [updatedQuizbook, isUserLiked];
   }
 
   async increaseQuizCount(quizBookId: number) {
@@ -187,26 +208,45 @@ export class QuizBookService {
     return new SolveResultQuizBookDTO(solvedQuizBook);
   }
 
-  async getQuizBookOwnedByUSer(userId: number, isDone: boolean) {
-    const quizBookList = await this.quizBookRepository.find({
-      ownerId: userId,
-      completed: isDone,
+  async getQuizBookOwnedByUSer(userId: number, isDone: boolean, page: number) {
+    const take = QUIZBOOKS_PER_PAGE;
+    const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+
+    const quizBookList = await this.quizBookRepository.query(
+      `select qb.id, qb.title, qb.ownerId, qb.createdAt, qb.ownerName,
+      qb.quizCount, qb.solvedCount, qb.likedCount, 
+      usq.liked  
+      from quizBook as qb join userSolveQuizBook as usq
+      on usq.quizBookId = qb.id
+      where qb.ownerId = ? and usq.completed = ?
+      limit ? offset ?`,
+      [userId, isDone, take, skip],
+    );
+
+    const dto = quizBookList.map((entity) => {
+      return new QuizBookwithLikedResponseDTO(entity);
     });
 
-    return quizBookList;
+    return dto;
   }
 
-  async getQuizBookSolvedByUser(userId: number, isDone: boolean) {
-    const userSolveQuizBookList = await this.userSolveQuizBookRespository.find({
-      relations: ['quizBook'],
-      where: {
-        userId,
-        completed: isDone,
-      },
-    });
+  async getQuizBookSolvedByUser(userId: number, page: number, isDone: boolean) {
+    const take = QUIZBOOKS_PER_PAGE;
+    const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+
+    const userSolveQuizBookList = await this.quizBookRepository.query(
+      `select qb.id, qb.title, qb.ownerId, qb.createdAt, qb.ownerName,
+      qb.quizCount, qb.solvedCount, qb.likedCount, 
+      usq.liked 
+      from quizBook as qb join userSolveQuizBook as usq
+      on usq.quizBookId = qb.id
+      where usq.userId = ? and usq.completed = ?
+      limit ? offset ?`,
+      [userId, isDone, take, skip],
+    );
 
     const quizBookList = userSolveQuizBookList.map((entity) => {
-      return entity.quizBook;
+      return new QuizBookwithLikedResponseDTO(entity);
     });
 
     return quizBookList;
