@@ -34,7 +34,6 @@ export class QuizBookService {
     categoryId: number,
     page: number,
     keyword: string,
-    userId: number,
   ): Promise<QuizBookwithLikedResponseDTO[]> {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
@@ -45,9 +44,9 @@ export class QuizBookService {
       usq.liked 
       from quizBook as qb join userSolveQuizBook as usq
       on usq.quizBookId = qb.id
-      where usq.userId = ? and qb.categoryId = ? and qb.title like '%?%' 
+      where qb.categoryId = ? and qb.title like '%?%' 
       limit ? offset ?`,
-      [userId, categoryId, keyword, take, skip],
+      [categoryId, keyword, take, skip],
     );
     const dto = quizbookList.map((entity) => {
       return new QuizBookwithLikedResponseDTO(entity);
@@ -68,7 +67,6 @@ export class QuizBookService {
     categoryId: number,
     page: number,
     isSortByDate: boolean,
-    userId: number,
   ): Promise<QuizBookwithLikedResponseDTO[]> {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
@@ -79,9 +77,9 @@ export class QuizBookService {
       usq.liked 
       from quizBook as qb join userSolveQuizBook as usq
       on usq.quizBookId = qb.id
-      where usq.userId = ? and categoryId = ?
+      where categoryId = ?
       limit ? offset ?`,
-      [userId, categoryId, take, skip],
+      [categoryId, take, skip],
     );
 
     if (!isSortByDate) {
