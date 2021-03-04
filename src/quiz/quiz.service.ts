@@ -37,6 +37,16 @@ export class QuizService {
     return quizzes;
   }
 
+  async findByIdAndCheckOwner(id: number, userId: number): Promise<QuizEntity> {
+    const quiz = await this.QuizRepository.findOne(id);
+    const quizBook = await this.quizBookService.findQuizBookbyId(
+      quiz.quizBookId,
+    );
+    await this.quizBookService.checkAuthorization(quizBook.ownerId, userId);
+
+    return quiz;
+  }
+
   async createQuiz(quiz: CreateQuizRequestDTO): Promise<QuizEntity> {
     const newQuiz = this.QuizRepository.create(quiz);
     await this.QuizRepository.save(newQuiz).catch(() => {

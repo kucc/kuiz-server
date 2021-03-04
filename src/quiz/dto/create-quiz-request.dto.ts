@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsBoolean,
+  IsOptional,
+  IsBooleanString,
+} from 'class-validator';
 
 export default class CreateQuizRequestDTO {
   public quizBookId: number;
@@ -36,6 +42,6 @@ export default class CreateQuizRequestDTO {
   public readonly description: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBooleanString()
   public readonly isChoice: boolean;
 }
