@@ -18,11 +18,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('rank')
-  public async getTotalRank(
-    @Query('start') start: number,
-    @Query('count') count: number,
-  ) {
-    const rankList = await this.userService.getTotalPointRank(start, count);
+  public async getTotalRank() {
+    const rankList = await this.userService.getTotalPointRank();
 
     return rankList;
   }

@@ -83,13 +83,11 @@ export class UserService {
     return updatedUser;
   }
 
-  async getTotalPointRank(start, count) {
+  async getTotalPointRank() {
     const rankList = await this.userRepository.find({
       order: {
         point: 'DESC',
       },
-      skip: start - 1,
-      take: count,
     });
     return rankList;
   }
