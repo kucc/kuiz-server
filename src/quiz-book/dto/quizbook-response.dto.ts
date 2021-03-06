@@ -20,7 +20,7 @@ export class QuizBookwithLikedResponseDTO {
     this.quizCount = joined.quizCount;
     this.solvedCount = joined.solvedCount;
     this.likedCount = joined.likedCount;
-    this.liked = joined.liked;
+    this.liked = joined.liked === null ? false : joined.liked;
   }
   readonly id: number;
   readonly title: string;
@@ -62,12 +62,10 @@ export class EditQuizBookResponseDTO {
 }
 
 export class LikeQuizBookResponseDTO {
-  constructor(quizBook: QuizBookEntity, liked: boolean) {
-    this.id = quizBook.id;
-    this.likedCount = quizBook.likedCount;
+  constructor(likedCount: number, liked: boolean) {
+    this.likedCount = likedCount;
     this.liked = liked;
   }
-  readonly id: number;
   readonly likedCount: number;
-  liked: boolean;
+  readonly liked: boolean;
 }
