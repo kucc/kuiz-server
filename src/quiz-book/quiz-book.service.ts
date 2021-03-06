@@ -1,4 +1,4 @@
-import { Repository, Like, getConnection } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   BadRequestException,
