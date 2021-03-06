@@ -33,10 +33,8 @@ export class QuizBookService {
   async searchQuizBookListByKeyword(
     categoryId: number,
     kw: string,
-    //options: PaginationOptionsInterface,
   ): Promise<QuizBookEntity[]> {
-    const connection = getConnection(); //확인
-    const quizbookList = await connection.getRepository(QuizBookEntity).find({
+    const quizbookList = await this.quizBookRepository.find({
       title: Like(`%${kw}%`),
       categoryId,
     });
