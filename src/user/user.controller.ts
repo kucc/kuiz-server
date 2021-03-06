@@ -37,11 +37,12 @@ export class UserController {
   @UseGuards(new UserGuard())
   public async getUserInfo(@Req() request: Request): Promise<UserResponseDTO> {
     const { user } = request;
+    const userInfo = await this.userService.findUserById(user.id);
 
-    return user;
+    return new UserResponseDTO(userInfo);
   }
 
-  @Patch('/:userId/nickname')
+  @Patch('/nickname')
   @UseGuards(new UserGuard())
   public async updateUserNickname(
     @Req() request: Request,
