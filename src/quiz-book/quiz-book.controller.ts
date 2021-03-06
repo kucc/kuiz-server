@@ -43,7 +43,6 @@ export class QuizBookController {
   ) {}
 
   @Get('search')
-  //@UseGuards(new UserGuard())
   async searchQuizBookListByKeyword(
     @Query('categoryId') categoryId: number,
     @Query('keyword') keyword: string,
@@ -96,6 +95,17 @@ export class QuizBookController {
     return quizzes;
   }
 
+  @Get('unsolved')
+  @UseGuards(new UserGuard())
+  async getUnsolvedQuizBookByUser(@Req() request: Request) {
+    const { user } = request;
+    const unsolvedQuizBookList = await this.quizBookService.getUnsolvedQuizBookByUser(
+      user.id,
+    );
+
+    return unsolvedQuizBookList;
+  }
+
   @Get('')
   async getQuizBookList(
     @Query('categoryId') categoryId: number,
@@ -110,17 +120,6 @@ export class QuizBookController {
     );
 
     return quizBookList;
-  }
-
-  @Get('unsolved')
-  @UseGuards(new UserGuard())
-  async getUnsolvedQuizBookByUser(@Req() request: Request) {
-    const { user } = request;
-    const unsolvedQuizBookList = await this.quizBookService.getUnsolvedQuizBookByUser(
-      user.id,
-    );
-
-    return unsolvedQuizBookList;
   }
 
   @Post(':quizBookId/solve')
