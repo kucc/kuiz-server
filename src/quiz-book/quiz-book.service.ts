@@ -57,20 +57,18 @@ export class QuizBookService {
   ): Promise<QuizBookEntity[]> {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+    const orderOption = isSortByDate
+      ? ({ id: 'ASC' } as const)
+      : ({ likedCount: 'DESC' } as const);
+
     const data = await this.quizBookRepository.find({
       where: {
         categoryId,
       },
+      order: orderOption,
       take,
       skip,
     });
-
-    if (!isSortByDate) {
-      data.sort(
-        (frontQuizBook, nextQuizBook) =>
-          nextQuizBook.likedCount - frontQuizBook.likedCount, //sort by likes
-      );
-    }
 
     if (!data.length) {
       throw new NotFoundException('페이지가 존재하지 않습니다.');
@@ -221,8 +219,6 @@ export class QuizBookService {
       `,
       [categoryId, userId, take, skip],
     );
-
-    console.log(unsolvedQuizBookList.length);
 
     if (!isSortByDate) {
       unsolvedQuizBookList.sort(
