@@ -1,4 +1,4 @@
-import { Repository, Like, getConnection } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   BadRequestException,
@@ -50,7 +50,7 @@ export class QuizBookService {
     return quizBook;
   }
 
-  async findAllQuizBookByCategory(
+  async findQuizBookByCategory(
     categoryId: number,
     page: number,
     isSortByDate: boolean,
@@ -207,13 +207,29 @@ export class QuizBookService {
   }
 
   async getUnsolvedQuizBookByUser(
+    categoryId: number,
     userId: number,
+    page: number,
+    isSortByDate: boolean,
   ): Promise<QuizBookResponseDTO[]> {
+    const take = QUIZBOOKS_PER_PAGE;
+    const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
     const unsolvedQuizBookList = await this.userSolveQuizBookRespository.query(
-      `SELECT * FROM quizBook WHERE id NOT IN 
-        ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ? )`,
-      [userId],
+      `SELECT * FROM quizBook WHERE categoryId = ? AND id NOT IN 
+        ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ? ) 
+        ORDER BY id limit ? offset ?
+      `,
+      [categoryId, userId, take, skip],
     );
+
+    console.log(unsolvedQuizBookList.length);
+
+    if (!isSortByDate) {
+      unsolvedQuizBookList.sort(
+        (frontQuizBook, nextQuizBook) =>
+          nextQuizBook.likedCount - frontQuizBook.likedCount, //sort by likes
+      );
+    }
 
     return unsolvedQuizBookList;
   }
