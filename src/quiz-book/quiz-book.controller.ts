@@ -193,12 +193,12 @@ export class QuizBookController {
     @Param('quizBookId') quizBookId: number,
   ): Promise<LikeQuizBookResponseDTO> {
     const userId = request.user.id;
-    const likedQuizBook = await this.quizBookService.updateQuizBookLikes(
-      quizBookId,
-      userId,
-    );
+    const {
+      likedCount,
+      liked,
+    } = await this.quizBookService.updateQuizBookLikes(quizBookId, userId);
 
-    return likedQuizBook;
+    return new LikeQuizBookResponseDTO(likedCount, liked);
   }
 
   @Patch(':quizBookId')

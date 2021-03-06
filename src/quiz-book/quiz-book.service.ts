@@ -144,10 +144,8 @@ export class QuizBookService {
     return editedQuizBook;
   }
 
-  async updateQuizBookLikes(
-    quizBookId: number,
-    userId: number,
-  ): Promise<[QuizBookEntity, boolean]> {
+  //좋아요 수 변경
+  async updateQuizBookLikes(quizBookId: number, userId: number) {
     const quizBook = await this.findQuizBookbyId(quizBookId);
     const isUserLiked = await this.userSolveQuizBookService.toggleQuizBookLikes(
       quizBookId,
@@ -160,7 +158,8 @@ export class QuizBookService {
       quizBook.likedCount -= 1;
     }
     const updatedQuizbook = await this.quizBookRepository.save(quizBook);
-    return [updatedQuizbook, isUserLiked];
+
+    return { likedCount: quizBook.likedCount, liked: isUserLiked };
   }
 
   async increaseQuizCount(quizBookId: number) {
