@@ -46,11 +46,14 @@ export class QuizBookController {
   @Get('search')
   @UseGuards(new UserGuard())
   async searchQuizBookListByKeyword(
+    @Req() req: Request,
     @Query('categoryId') categoryId: number,
     @Query('page') page: number,
     @Query('keyword') keyword: string,
   ) {
+    const userId = req.user.id;
     const quizBookList = await this.quizBookService.searchQuizBookListByKeyword(
+      userId,
       categoryId,
       page,
       keyword,
@@ -105,12 +108,15 @@ export class QuizBookController {
 
   @Get('')
   async getQuizBookList(
+    @Req() req: Request,
     @Query('categoryId') categoryId: number,
     @Query('page') page: number,
     @Query('isSortByDate', new DefaultValuePipe(false), ParseBoolPipe)
     isSortByDate: boolean,
   ) {
+    const userId = req.user.id;
     const quizBookList = await this.quizBookService.findAllQuizBookByCategory(
+      userId,
       categoryId,
       page,
       isSortByDate,
