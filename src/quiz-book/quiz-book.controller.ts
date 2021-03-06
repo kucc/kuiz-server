@@ -20,7 +20,6 @@ import {
   QuizBookResponseDTO,
   EditQuizBookResponseDTO,
   LikeQuizBookResponseDTO,
-  QuizBookListResponseDTO,
 } from './dto/quizbook-response.dto';
 import { QuizService } from 'src/quiz/quiz.service';
 import { QuizBookService } from './quiz-book.service';
@@ -104,6 +103,26 @@ export class QuizBookController {
     const quizzes = await this.quizService.findAllByQuizBookId(id);
 
     return quizzes;
+  }
+
+  @Get('unsolved')
+  @UseGuards(new UserGuard())
+  async getUnsolvedQuizBookByUser(
+    @Req() request: Request,
+    @Query('categoryId') categoryId: number,
+    @Query('page') page: number,
+    @Query('isSortByDate', new DefaultValuePipe(false), ParseBoolPipe)
+    isSortByDate: boolean,
+  ) {
+    const { user } = request;
+    const unsolvedQuizBookList = await this.quizBookService.getUnsolvedQuizBookByUser(
+      categoryId,
+      user.id,
+      page,
+      isSortByDate,
+    );
+
+    return unsolvedQuizBookList;
   }
 
   @Get('')

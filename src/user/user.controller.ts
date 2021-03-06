@@ -18,11 +18,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('rank')
-  public async getTotalRank(
-    @Query('start') start: number,
-    @Query('count') count: number,
-  ) {
-    const rankList = await this.userService.getTotalPointRank(start, count);
+  public async getTotalRank() {
+    const rankList = await this.userService.getTotalPointRank();
 
     return rankList;
   }
@@ -40,11 +37,12 @@ export class UserController {
   @UseGuards(new UserGuard())
   public async getUserInfo(@Req() request: Request): Promise<UserResponseDTO> {
     const { user } = request;
+    const userInfo = await this.userService.findUserById(user.id);
 
-    return user;
+    return new UserResponseDTO(userInfo);
   }
 
-  @Patch('/:userId/nickname')
+  @Patch('/nickname')
   @UseGuards(new UserGuard())
   public async updateUserNickname(
     @Req() request: Request,
