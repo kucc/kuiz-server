@@ -20,6 +20,7 @@ import {
   QuizBookwithLikedResponseDTO,
 } from './dto/quizbook-response.dto';
 
+
 @Injectable()
 export class QuizBookService {
   constructor(
@@ -30,7 +31,7 @@ export class QuizBookService {
     private readonly userSolveQuizBookRespository: Repository<UserSolveQuizBookEntity>,
 
     private readonly userSolveQuizBookService: UserSolveQuizBookService,
-    private readonly userSerive: UserService,
+    private readonly userService: UserService,
   ) {}
 
   async searchQuizBookListByKeyword(
@@ -73,7 +74,6 @@ export class QuizBookService {
   ) {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
-
     const quizbooks = await this.quizBookRepository.query(
       `SELECT qb.*, usq.liked, 
       CASE WHEN usq.id IS NULL THEN false END 
@@ -117,7 +117,7 @@ export class QuizBookService {
     const quizBook = this.quizBookRepository.create(quizbookDTO);
     await this.quizBookRepository.save(quizBook);
 
-    await this.userSerive.increaseUserPoint(userId, 100);
+    await this.userService.increaseUserPoint(userId, 100);
 
     return quizBook;
   }
@@ -226,10 +226,6 @@ export class QuizBookService {
       solveQuizBookDTO,
     );
 
-    if (solveQuizBookDTO.isCorrect) {
-      await this.userSerive.increaseUserPoint(userId, 30);
-    }
-
     return new SolveResultQuizBookDTO(solvedQuizBook);
   }
 
@@ -275,5 +271,31 @@ export class QuizBookService {
     });
 
     return quizBookList;
+  }
+
+  async getUnsolvedQuizBookByUser(
+    categoryId: number,
+    userId: number,
+    page: number,
+    isSortByDate: boolean,
+  ): Promise<QuizBookResponseDTO[]> {
+    const take = QUIZBOOKS_PER_PAGE;
+    const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+    const unsolvedQuizBookList = await this.userSolveQuizBookRespository.query(
+      `SELECT * FROM quizBook WHERE categoryId = ? AND id NOT IN 
+        ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ? ) 
+        ORDER BY id limit ? offset ?
+      `,
+      [categoryId, userId, take, skip],
+    );
+
+    if (!isSortByDate) {
+      unsolvedQuizBookList.sort(
+        (frontQuizBook, nextQuizBook) =>
+          nextQuizBook.likedCount - frontQuizBook.likedCount, //sort by likes
+      );
+    }
+
+    return unsolvedQuizBookList;
   }
 }

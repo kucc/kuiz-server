@@ -5,12 +5,14 @@ import {
   Param,
   Patch,
   Req,
+  Get,
   UseGuards,
 } from '@nestjs/common';
 import { MemberGuard } from 'src/common/guards/member.guard';
-import UpdateQuizRequestDTO from './dto/update-quiz-request.dto';
 import { QuizService } from './quiz.service';
 import { StorageService } from 'src/storage/storage.service';
+import { EditableQuizResponseDTO } from './dto/editable-quiz-response.dto';
+import UpdateQuizRequestDTO from './dto/update-quiz-request.dto';
 
 @Controller('quiz')
 export class QuizController {
@@ -18,6 +20,18 @@ export class QuizController {
     private readonly quizService: QuizService,
     private readonly storageService: StorageService,
   ) {}
+
+  @Get(':quizId')
+  @UseGuards(MemberGuard)
+  async getQuiz(
+    @Req() request,
+    @Param('quizId') quizId: number,
+  ): Promise<EditableQuizResponseDTO> {
+    const userId = request.user.id;
+    const quiz = await this.quizService.findByIdAndCheckOwner(quizId, userId);
+
+    return new EditableQuizResponseDTO(quiz);
+  }
 
   @Patch(':quizId')
   @UseGuards(MemberGuard)
