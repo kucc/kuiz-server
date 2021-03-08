@@ -191,14 +191,20 @@ export class QuizBookController {
   async updateQuizBookLikes(
     @Req() request: Request,
     @Param('quizBookId') quizBookId: number,
+  ) {
+    const userId = request.user.id;
+
+    return await this.quizBookService.updateQuizBookLikes(quizBookId, userId);
+  }
+
+  @Get(':quizBookId/like')
+  @UseGuards(new UserGuard())
+  async getQuizBookLikes(
+    @Req() request: Request,
+    @Param('quizBookId') quizBookId: number,
   ): Promise<LikeQuizBookResponseDTO> {
     const userId = request.user.id;
-    const {
-      likedCount,
-      liked,
-    } = await this.quizBookService.updateQuizBookLikes(quizBookId, userId);
-
-    return new LikeQuizBookResponseDTO(likedCount, liked);
+    return await this.quizBookService.getQuizBookLikes(quizBookId, userId);
   }
 
   @Patch(':quizBookId')

@@ -31,7 +31,7 @@ export class QuizBookwithLikedResponseDTO {
   readonly quizCount: number;
   readonly solvedCount: number;
   readonly likedCount: number;
-  readonly liked: boolean;
+  liked: boolean;
 }
 export class QuizBookResponseDTO {
   constructor(quizBook: QuizBookEntity) {
@@ -62,10 +62,12 @@ export class EditQuizBookResponseDTO {
 }
 
 export class LikeQuizBookResponseDTO {
-  constructor(likedCount: number, liked: boolean) {
+  constructor(id: number, likedCount: number, liked: boolean) {
+    this.id = id;
     this.likedCount = likedCount;
     this.liked = liked;
   }
+  readonly id: number;
   readonly likedCount: number;
   readonly liked: boolean;
 }

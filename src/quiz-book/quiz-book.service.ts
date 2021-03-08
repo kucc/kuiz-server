@@ -15,7 +15,10 @@ import { UserSolveQuizBookService } from '../user-solve-quiz-book/user-solve-qui
 import { SolveQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-request.dto';
 import { SolveResultQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-response.dto';
 import { UserSolveQuizBookEntity } from 'src/entity/user-solve-quiz-book.entity';
-import { QuizBookwithLikedResponseDTO } from './dto/quizbook-response.dto';
+import {
+  LikeQuizBookResponseDTO,
+  QuizBookwithLikedResponseDTO,
+} from './dto/quizbook-response.dto';
 
 @Injectable()
 export class QuizBookService {
@@ -157,9 +160,39 @@ export class QuizBookService {
     } else {
       quizBook.likedCount -= 1;
     }
-    const updatedQuizbook = await this.quizBookRepository.save(quizBook);
+    const updatedQuizBook = await this.quizBookRepository.save(quizBook);
 
-    return { likedCount: quizBook.likedCount, liked: isUserLiked };
+    // return new LikeQuizBookResponseDTO(
+    //   +quizBookId,
+    //   quizBook.likedCount,
+    //   isUserLiked,
+    // );
+    const result = new QuizBookwithLikedResponseDTO(updatedQuizBook);
+    result.liked = isUserLiked;
+    return result;
+  }
+
+  async getQuizBookLikes(quizBookId: number, userId: number) {
+    const quizBook = await this.findQuizBookbyId(quizBookId);
+    const isUserLike = await this.userSolveQuizBookRespository.findOne({
+      where: {
+        quizBookId,
+        userId,
+      },
+    });
+
+    if (!isUserLike) {
+      return new LikeQuizBookResponseDTO(
+        +quizBookId,
+        quizBook.likedCount,
+        false,
+      );
+    }
+    return new LikeQuizBookResponseDTO(
+      +quizBookId,
+      quizBook.likedCount,
+      isUserLike.liked,
+    );
   }
 
   async increaseQuizCount(quizBookId: number) {
@@ -200,6 +233,7 @@ export class QuizBookService {
     return new SolveResultQuizBookDTO(solvedQuizBook);
   }
 
+  //이건 liked 빼는게 어떨지
   async getQuizBookOwnedByUSer(userId: number, isDone: boolean, page: number) {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
@@ -207,7 +241,6 @@ export class QuizBookService {
     const quizBookList = await this.quizBookRepository.query(
       `select qb.id, qb.title, qb.ownerId, qb.createdAt, qb.ownerName,
       qb.quizCount, qb.solvedCount, qb.likedCount, 
-      usq.liked  
       from quizBook as qb join userSolveQuizBook as usq
       on usq.quizBookId = qb.id
       where qb.ownerId = ? and usq.completed = ?
