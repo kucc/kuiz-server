@@ -215,7 +215,7 @@ export class QuizBookService {
     const unsolvedQuizBookList = await this.userSolveQuizBookRespository.query(
       `SELECT * FROM quizBook WHERE categoryId = ? AND id NOT IN 
         ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ? ) 
-        ORDER BY id limit ? offset ?
+        ORDER BY id DESC limit ? offset ?;
       `,
       [categoryId, userId, take, skip],
     );
