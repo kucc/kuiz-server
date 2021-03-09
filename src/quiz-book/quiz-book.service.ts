@@ -20,7 +20,6 @@ import {
   QuizBookwithLikedResponseDTO,
 } from './dto/quizbook-response.dto';
 
-
 @Injectable()
 export class QuizBookService {
   constructor(
@@ -278,7 +277,7 @@ export class QuizBookService {
     userId: number,
     page: number,
     isSortByDate: boolean,
-  ): Promise<QuizBookResponseDTO[]> {
+  ) {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
     const unsolvedQuizBookList = await this.userSolveQuizBookRespository.query(
