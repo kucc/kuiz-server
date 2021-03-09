@@ -212,20 +212,15 @@ export class QuizBookService {
   ): Promise<QuizBookResponseDTO[]> {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+    const orderOption = isSortByDate ? 'id' : 'likedCount';
+
     const unsolvedQuizBookList = await this.userSolveQuizBookRespository.query(
       `SELECT * FROM quizBook WHERE categoryId = ? AND id NOT IN 
         ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ? ) 
-        ORDER BY id DESC limit ? offset ?;
+        ORDER BY ${orderOption} DESC limit ? offset ?;
       `,
       [categoryId, userId, take, skip],
     );
-
-    if (!isSortByDate) {
-      unsolvedQuizBookList.sort(
-        (frontQuizBook, nextQuizBook) =>
-          nextQuizBook.likedCount - frontQuizBook.likedCount, //sort by likes
-      );
-    }
 
     return unsolvedQuizBookList;
   }
