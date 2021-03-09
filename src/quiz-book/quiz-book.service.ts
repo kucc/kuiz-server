@@ -58,7 +58,7 @@ export class QuizBookService {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
     const orderOption = isSortByDate
-      ? ({ id: 'ASC' } as const)
+      ? ({ id: 'DESC' } as const)
       : ({ likedCount: 'DESC' } as const);
 
     const data = await this.quizBookRepository.find({
