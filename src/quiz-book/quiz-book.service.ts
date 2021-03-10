@@ -59,7 +59,7 @@ export class QuizBookService {
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
     const orderOption = isSortByDate
       ? ({ id: 'DESC' } as const)
-      : ({ likedCount: 'DESC' } as const);
+      : ({ likedCount: 'DESC', id: 'DESC' } as const);
 
     const data = await this.quizBookRepository.find({
       where: {
@@ -221,6 +221,10 @@ export class QuizBookService {
       `,
       [categoryId, userId, take, skip],
     );
+
+    if (!unsolvedQuizBookList.length) {
+      throw new NotFoundException('페이지가 존재하지 않습니다.');
+    }
 
     return unsolvedQuizBookList;
   }
