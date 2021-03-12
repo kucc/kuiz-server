@@ -1,4 +1,4 @@
-import { Repository, Like, getConnection } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   BadRequestException,
@@ -33,10 +33,8 @@ export class QuizBookService {
   async searchQuizBookListByKeyword(
     categoryId: number,
     kw: string,
-    //options: PaginationOptionsInterface,
   ): Promise<QuizBookEntity[]> {
-    const connection = getConnection(); //확인
-    const quizbookList = await connection.getRepository(QuizBookEntity).find({
+    const quizbookList = await this.quizBookRepository.find({
       title: Like(`%${kw}%`),
       categoryId,
     });
@@ -52,27 +50,25 @@ export class QuizBookService {
     return quizBook;
   }
 
-  async findAllQuizBookByCategory(
+  async findQuizBookByCategory(
     categoryId: number,
     page: number,
     isSortByDate: boolean,
   ): Promise<QuizBookEntity[]> {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+    const orderOption = isSortByDate
+      ? ({ id: 'DESC' } as const)
+      : ({ likedCount: 'DESC', id: 'DESC' } as const);
+
     const data = await this.quizBookRepository.find({
       where: {
         categoryId,
       },
+      order: orderOption,
       take,
       skip,
     });
-
-    if (!isSortByDate) {
-      data.sort(
-        (frontQuizBook, nextQuizBook) =>
-          nextQuizBook.likedCount - frontQuizBook.likedCount, //sort by likes
-      );
-    }
 
     if (!data.length) {
       throw new NotFoundException('페이지가 존재하지 않습니다.');
@@ -209,13 +205,26 @@ export class QuizBookService {
   }
 
   async getUnsolvedQuizBookByUser(
+    categoryId: number,
     userId: number,
+    page: number,
+    isSortByDate: boolean,
   ): Promise<QuizBookResponseDTO[]> {
+    const take = QUIZBOOKS_PER_PAGE;
+    const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+    const orderOption = isSortByDate ? 'id' : 'likedCount';
+
     const unsolvedQuizBookList = await this.userSolveQuizBookRespository.query(
-      `SELECT * FROM quizBook WHERE id NOT IN 
-        ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ? )`,
-      [userId],
+      `SELECT * FROM quizBook WHERE categoryId = ? AND id NOT IN 
+        ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ? ) 
+        ORDER BY ${orderOption} DESC limit ? offset ?;
+      `,
+      [categoryId, userId, take, skip],
     );
+
+    if (!unsolvedQuizBookList.length) {
+      throw new NotFoundException('페이지가 존재하지 않습니다.');
+    }
 
     return unsolvedQuizBookList;
   }

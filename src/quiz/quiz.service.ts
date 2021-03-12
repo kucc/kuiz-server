@@ -8,7 +8,6 @@ import { QuizEntity } from 'src/entity/quiz.entity';
 import { QuizBookService } from 'src/quiz-book/quiz-book.service';
 import { Repository } from 'typeorm';
 import CreateQuizRequestDTO from './dto/create-quiz-request.dto';
-import { QuizResponseDTO } from './dto/quiz-response.dto';
 import UpdateQuizRequestDTO from './dto/update-quiz-request.dto';
 
 @Injectable()
@@ -63,18 +62,14 @@ export class QuizService {
     userId: number,
     quiz: QuizEntity,
     requestDTO: UpdateQuizRequestDTO,
-  ): Promise<QuizResponseDTO> {
+  ): Promise<QuizEntity> {
     const quizBook = await this.quizBookService.findQuizBookbyId(
       quiz.quizBookId,
     );
     await this.quizBookService.checkAuthorization(quizBook.ownerId, userId);
 
-    const updatedQuiz = this.QuizRepository.merge(quiz, requestDTO);
-    await this.QuizRepository.save(updatedQuiz).catch(() => {
-      throw new BadRequestException('잘못된 요청입니다.');
-    });
-
-    return new QuizResponseDTO(updatedQuiz);
+    await this.QuizRepository.update(quiz, { ...requestDTO });
+    return await this.QuizRepository.findOne(quiz.id);
   }
 
   async deleteQuiz(quizId: number): Promise<{ result: boolean }> {

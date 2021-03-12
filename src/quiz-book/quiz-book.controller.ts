@@ -43,7 +43,6 @@ export class QuizBookController {
   ) {}
 
   @Get('search')
-  //@UseGuards(new UserGuard())
   async searchQuizBookListByKeyword(
     @Query('categoryId') categoryId: number,
     @Query('keyword') keyword: string,
@@ -96,6 +95,26 @@ export class QuizBookController {
     return quizzes;
   }
 
+  @Get('unsolved')
+  @UseGuards(new UserGuard())
+  async getUnsolvedQuizBookByUser(
+    @Req() request: Request,
+    @Query('categoryId') categoryId: number,
+    @Query('page') page: number,
+    @Query('isSortByDate', new DefaultValuePipe(false), ParseBoolPipe)
+    isSortByDate: boolean,
+  ) {
+    const { user } = request;
+    const unsolvedQuizBookList = await this.quizBookService.getUnsolvedQuizBookByUser(
+      categoryId,
+      user.id,
+      page,
+      isSortByDate,
+    );
+
+    return unsolvedQuizBookList;
+  }
+
   @Get('')
   async getQuizBookList(
     @Query('categoryId') categoryId: number,
@@ -103,24 +122,13 @@ export class QuizBookController {
     @Query('isSortByDate', new DefaultValuePipe(false), ParseBoolPipe)
     isSortByDate: boolean,
   ) {
-    const quizBookList = await this.quizBookService.findAllQuizBookByCategory(
+    const quizBookList = await this.quizBookService.findQuizBookByCategory(
       categoryId,
       page,
       isSortByDate,
     );
 
     return quizBookList;
-  }
-
-  @Get('unsolved')
-  @UseGuards(new UserGuard())
-  async getUnsolvedQuizBookByUser(@Req() request: Request) {
-    const { user } = request;
-    const unsolvedQuizBookList = await this.quizBookService.getUnsolvedQuizBookByUser(
-      user.id,
-    );
-
-    return unsolvedQuizBookList;
   }
 
   @Post(':quizBookId/solve')

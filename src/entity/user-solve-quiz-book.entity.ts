@@ -23,6 +23,9 @@ export class UserSolveQuizBookEntity {
   @Column({ type: 'int', default: -1 })
   savedQuizId: number;
 
+  @Column({ type: 'int', default: 0 })
+  savedCorrectCount: number;
+
   @Column({ type: 'int', nullable: false })
   userId: number;
 
