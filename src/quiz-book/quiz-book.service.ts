@@ -73,11 +73,12 @@ export class QuizBookService {
   ) {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+    const orderOption = isSortByDate ? 'qb.id' : 'qb.likedCount';
     const quizbooks = await this.quizBookRepository.query(
       `SELECT qb.*, usq.liked, 
       CASE WHEN usq.id IS NULL THEN false END 
       FROM quizBook qb LEFT JOIN userSolveQuizBook usq ON qb.id=usq.quizBookId AND usq.userId=? 
-      WHERE categoryId = ? LIMIT ? OFFSET ?`,
+      WHERE categoryId = ? ORDER BY ${orderOption} DESC LIMIT ? OFFSET ?`,
       [userId, categoryId, take, skip],
     );
 
@@ -161,11 +162,6 @@ export class QuizBookService {
     }
     const updatedQuizBook = await this.quizBookRepository.save(quizBook);
 
-    // return new LikeQuizBookResponseDTO(
-    //   +quizBookId,
-    //   quizBook.likedCount,
-    //   isUserLiked,
-    // );
     const result = new QuizBookwithLikedResponseDTO(updatedQuizBook);
     result.liked = isUserLiked;
     return result;
@@ -280,19 +276,18 @@ export class QuizBookService {
   ) {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+    const orderOption = isSortByDate ? 'id' : 'likedCount';
+
     const unsolvedQuizBookList = await this.userSolveQuizBookRespository.query(
       `SELECT * FROM quizBook WHERE categoryId = ? AND id NOT IN 
         ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ? ) 
-        ORDER BY id limit ? offset ?
+        ORDER BY ${orderOption} DESC limit ? offset ?;
       `,
       [categoryId, userId, take, skip],
     );
 
-    if (!isSortByDate) {
-      unsolvedQuizBookList.sort(
-        (frontQuizBook, nextQuizBook) =>
-          nextQuizBook.likedCount - frontQuizBook.likedCount, //sort by likes
-      );
+    if (!unsolvedQuizBookList.length) {
+      throw new NotFoundException('페이지가 존재하지 않습니다.');
     }
 
     return unsolvedQuizBookList;

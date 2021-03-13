@@ -125,6 +125,7 @@ export class QuizBookController {
     return unsolvedQuizBookList;
   }
 
+  @UseGuards(new UserGuard())
   @Get('')
   async getQuizBookList(
     @Req() req: Request,
