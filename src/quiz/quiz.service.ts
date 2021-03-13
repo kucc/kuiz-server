@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuizEntity } from 'src/entity/quiz.entity';
@@ -21,7 +22,7 @@ export class QuizService {
   async findById(id: number): Promise<QuizEntity> {
     const quiz = await this.QuizRepository.findOne(id);
     if (!quiz) {
-      throw new BadRequestException('존재하지 않는 문제입니다.');
+      throw new NotFoundException('존재하지 않는 문제입니다.');
     }
     return quiz;
   }
@@ -37,7 +38,7 @@ export class QuizService {
   }
 
   async findByIdAndCheckOwner(id: number, userId: number): Promise<QuizEntity> {
-    const quiz = await this.QuizRepository.findOne(id);
+    const quiz = await this.findById(id);
     const quizBook = await this.quizBookService.findQuizBookbyId(
       quiz.quizBookId,
     );
