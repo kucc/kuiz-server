@@ -223,4 +223,14 @@ export class QuizBookController {
 
     return new EditQuizBookResponseDTO(editedQuizBook);
   }
+
+  @Get('/:quizBookId/authorize')
+  async checkQuizBookAuthByQuizBookId(
+    @Req() request: Request,
+    @Param('quizBookId') quizBookId: number,
+  ): Promise<boolean> {
+    const userId = request.user.id;
+
+    return await this.quizBookService.checkAuthByQuizBookId(quizBookId, userId);
+  }
 }

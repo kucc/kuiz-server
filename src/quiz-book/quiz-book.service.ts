@@ -228,4 +228,16 @@ export class QuizBookService {
 
     return unsolvedQuizBookList;
   }
+
+  async checkAuthByQuizBookId(
+    quizBookId: number,
+    userId: number,
+  ): Promise<boolean> {
+    const quizBook = await this.findQuizBookbyId(quizBookId);
+    if (quizBook.ownerId !== userId) {
+      throw new UnauthorizedException('권한이 없습니다.');
+    }
+
+    return true;
+  }
 }
