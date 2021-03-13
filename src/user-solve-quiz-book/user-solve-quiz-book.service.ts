@@ -84,6 +84,7 @@ export class UserSolveQuizBookService {
     if (solvedQuizBook.savedQuizId < solvedQuizBookDTO.quizId) {
       if (solvedQuizBookDTO.isCorrect) {
         await this.userService.increaseUserPoint(userId, 30);
+        solvedQuizBook.savedCorrectCount += 1;
       }
       solvedQuizBook.savedQuizId = solvedQuizBookDTO.quizId;
     }
