@@ -87,12 +87,14 @@ export class QuizBookController {
   }
 
   @Get(':id/quiz')
-  async getAllQuizBookQuiz(
+  async getQuizBookQuiz(
+    @Req() request: Request,
     @Param('id') id: number,
   ): Promise<QuizResponseDTO[]> {
-    const quizzes = await this.quizService.findAllByQuizBookId(id);
+    const userId = request.user.id;
+    const quizList = await this.quizService.getQuizByQuizBookId(id, userId);
 
-    return quizzes;
+    return quizList;
   }
 
   @Get('unsolved')
