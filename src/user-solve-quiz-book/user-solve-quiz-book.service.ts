@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { SolveQuizBookDTO } from './dto/user-solve-quiz-book-request.dto';
@@ -16,6 +16,19 @@ export class UserSolveQuizBookService {
     private readonly quizBookRepository: Repository<QuizBookEntity>,
     private readonly userService: UserService,
   ) {}
+
+  async findQuizBookByCategory(
+    quizBookId: number,
+    userId: number,
+  ): Promise<UserSolveQuizBookEntity> {
+    const solvedQuizBook = await this.userSolveQuizBookRepository.findOne({
+      where: {
+        quizBookId,
+        userId,
+      },
+    });
+    return solvedQuizBook;
+  }
 
   async findandCreatebyQBIdandUserId(
     quizBookId: number,
@@ -43,13 +56,15 @@ export class UserSolveQuizBookService {
     quizBookId: number,
     userId: number,
   ): Promise<boolean> {
-    const solvedQuizBook = await this.findandCreatebyQBIdandUserId(
+    const solvedQuizBook = await this.findQuizBookByCategory(
       quizBookId,
       userId,
     );
 
-    if (!solvedQuizBook.completed) {
-      throw new BadRequestException('user does not solve quizbook');
+    if (!solvedQuizBook || !solvedQuizBook.completed) {
+      throw new NotFoundException(
+        '문제집을 다 풀어야 좋아요를 누를 수 있습니다.',
+      );
     }
 
     solvedQuizBook.liked = !solvedQuizBook.liked;

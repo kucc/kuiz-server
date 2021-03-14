@@ -43,18 +43,24 @@ export class QuizBookController {
   ) {}
 
   @Get('search')
+  @UseGuards(new UserGuard())
   async searchQuizBookListByKeyword(
+    @Req() req: Request,
     @Query('categoryId') categoryId: number,
+    @Query('page') page: number,
     @Query('keyword') keyword: string,
   ) {
+    const userId = req.user.id;
     const quizBookList = await this.quizBookService.searchQuizBookListByKeyword(
+      userId,
       categoryId,
+      page,
       keyword,
     );
     return quizBookList;
   }
 
-  @Get('solving')
+  @Get('my/solving')
   @UseGuards(new UserGuard())
   async getQuizBookSolvedByUser(
     @Req() request: Request,
@@ -70,7 +76,7 @@ export class QuizBookController {
     return quizBookList;
   }
 
-  @Get('owner')
+  @Get('my/owner')
   @UseGuards(new UserGuard())
   async getQuizBookOwnedByUSer(
     @Req() request: Request,
@@ -117,14 +123,18 @@ export class QuizBookController {
     return unsolvedQuizBookList;
   }
 
+  @UseGuards(new UserGuard())
   @Get('')
   async getQuizBookList(
+    @Req() req: Request,
     @Query('categoryId') categoryId: number,
     @Query('page') page: number,
     @Query('isSortByDate', new DefaultValuePipe(false), ParseBoolPipe)
     isSortByDate: boolean,
   ) {
-    const quizBookList = await this.quizBookService.findQuizBookByCategory(
+    const userId = req.user.id;
+    const quizBookList = await this.quizBookService.findAllQuizBookByCategory(
+      userId,
       categoryId,
       page,
       isSortByDate,
@@ -199,14 +209,20 @@ export class QuizBookController {
   async updateQuizBookLikes(
     @Req() request: Request,
     @Param('quizBookId') quizBookId: number,
+  ) {
+    const userId = request.user.id;
+
+    return await this.quizBookService.updateQuizBookLikes(quizBookId, userId);
+  }
+
+  @Get(':quizBookId/like')
+  @UseGuards(new UserGuard())
+  async getQuizBookLikes(
+    @Req() request: Request,
+    @Param('quizBookId') quizBookId: number,
   ): Promise<LikeQuizBookResponseDTO> {
     const userId = request.user.id;
-    const likedQuizBook = await this.quizBookService.updateQuizBookLikes(
-      quizBookId,
-      userId,
-    );
-
-    return likedQuizBook;
+    return await this.quizBookService.getQuizBookLikes(quizBookId, userId);
   }
 
   @Patch(':quizBookId')

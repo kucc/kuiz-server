@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Patch,
-  Query,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { UserGuard } from 'src/common/guards/user.guard';
 import { UpdateNicknameRequestDTO } from './dto/update-nickname.dto';
@@ -38,7 +30,7 @@ export class UserController {
   public async getUserInfo(@Req() request: Request): Promise<UserResponseDTO> {
     const { user } = request;
     const userInfo = await this.userService.findUserById(user.id);
-
+    console.log(userInfo);
     return new UserResponseDTO(userInfo);
   }
 
