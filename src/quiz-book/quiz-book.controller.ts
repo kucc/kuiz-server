@@ -66,12 +66,10 @@ export class QuizBookController {
     @Req() request: Request,
     @Query('isDone', new DefaultValuePipe(false), ParseBoolPipe)
     isDone: boolean,
-    @Query('page') page: number,
   ) {
     const { user } = request;
     const quizBookList = await this.quizBookService.getQuizBookSolvedByUser(
       user.id,
-      page,
       isDone,
     );
 
@@ -84,13 +82,11 @@ export class QuizBookController {
     @Req() request: Request,
     @Query('isDone', new DefaultValuePipe(false), ParseBoolPipe)
     isDone: boolean,
-    @Query('page') page: number,
   ) {
     const { user } = request;
     const quizBookList = await this.quizBookService.getQuizBookOwnedByUSer(
       user.id,
       isDone,
-      page,
     );
 
     return quizBookList;

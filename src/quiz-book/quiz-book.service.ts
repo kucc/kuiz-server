@@ -221,17 +221,12 @@ export class QuizBookService {
     return new SolveResultQuizBookDTO(solvedQuizBook);
   }
 
-  async getQuizBookOwnedByUSer(userId: number, isDone: boolean, page: number) {
-    const take = QUIZBOOKS_PER_PAGE;
-    const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
-
+  async getQuizBookOwnedByUSer(userId: number, isDone: boolean) {
     const quizBookList = await this.quizBookRepository.query(
       `SELECT * FROM quizBook 
-      WHERE ownerId= ? AND completed= ? 
-      LIMIT ? OFFSET ?`,
-      [userId, isDone, take, skip],
+      WHERE ownerId= ? AND completed= ?`,
+      [userId, isDone],
     );
-    console.log(quizBookList);
     const dto = quizBookList.map((entity) => {
       return new QuizBookwithLikedResponseDTO(entity);
     });
@@ -239,17 +234,13 @@ export class QuizBookService {
     return dto;
   }
 
-  async getQuizBookSolvedByUser(userId: number, page: number, isDone: boolean) {
-    const take = QUIZBOOKS_PER_PAGE;
-    const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
-
+  async getQuizBookSolvedByUser(userId: number, isDone: boolean) {
     const userSolveQuizBookList = await this.quizBookRepository.query(
       `SELECT qb.*, usq.liked 
       FROM quizBook AS qb LEFT JOIN userSolveQuizBook usq 
       ON qb.id=usq.quizBookId
-      WHERE usq.userId = ? AND usq.completed = ?
-      LIMIT ? OFFSET ?`,
-      [userId, isDone, take, skip],
+      WHERE usq.userId = ? AND usq.completed = ?`,
+      [userId, isDone],
     );
 
     const quizBookList = userSolveQuizBookList.map((entity) => {
