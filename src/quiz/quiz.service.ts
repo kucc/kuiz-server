@@ -37,6 +37,29 @@ export class QuizService {
     return quizzes;
   }
 
+  async getQuizByQuizBookId(
+    quizBookId: number,
+    userId: number,
+  ): Promise<QuizEntity[]> {
+    const isSolving = await this.QuizRepository.query(
+      `SELECT * FROM userSolveQuizBook 
+       WHERE userId = ? AND quizBookId = ? AND completed = false;`,
+      [userId, quizBookId],
+    );
+
+    const totalQuizList = await this.QuizRepository.find({ quizBookId });
+
+    const unsolvedQuizList = await this.QuizRepository.query(
+      `SELECT * FROM quiz 
+       WHERE quizBookId = ? 
+       AND id > ( SELECT savedQuizId FROM userSolveQuizBook WHERE userId = ? AND quizBookId = ?);`,
+      [quizBookId, userId, quizBookId],
+    );
+
+    if (!isSolving.length) return totalQuizList;
+    else return unsolvedQuizList;
+  }
+
   async findByIdAndCheckOwner(id: number, userId: number): Promise<QuizEntity> {
     const quiz = await this.findById(id);
     const quizBook = await this.quizBookService.findQuizBookbyId(
