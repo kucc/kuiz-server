@@ -43,12 +43,13 @@ export class QuizBookService {
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
 
     const quizbookList = await this.quizBookRepository.query(
-      `SELECT qb.*, usq.liked, 
-      CASE WHEN usq.id IS NULL THEN false END 
-      FROM quizBook qb LEFT JOIN userSolveQuizBook usq ON qb.id=usq.quizBookId AND usq.userId=? 
-      WHERE qb.categoryId = ? and qb.title like '%?%' 
+      `SELECT qb.*, usq.liked,
+      CASE WHEN usq.id IS NULL THEN false END
+      FROM quizBook qb LEFT JOIN userSolveQuizBook usq 
+      ON qb.id=usq.quizBookId AND usq.userId=?
+      WHERE qb.completed=1 AND qb.categoryId = ? AND qb.title LIKE '%${keyword}%' 
       LIMIT ? OFFSET ?`,
-      [userId, categoryId, keyword, take, skip],
+      [userId, categoryId, take, skip],
     );
     const dto = quizbookList.map((entity) => {
       return new QuizBookwithLikedResponseDTO(entity);
@@ -77,16 +78,12 @@ export class QuizBookService {
     const quizbooks = await this.quizBookRepository.query(
       `SELECT qb.*, usq.liked, 
       CASE WHEN usq.id IS NULL THEN false END 
-      FROM quizBook qb LEFT JOIN userSolveQuizBook usq ON qb.id=usq.quizBookId AND usq.userId=? 
-      WHERE categoryId = ? ORDER BY ${orderOption} DESC LIMIT ? OFFSET ?`,
+      FROM quizBook qb LEFT JOIN userSolveQuizBook usq 
+      ON qb.id=usq.quizBookId AND usq.userId=? 
+      WHERE qb.completed=1 AND categoryId = ? ORDER BY ${orderOption} DESC 
+      LIMIT ? OFFSET ?`,
       [userId, categoryId, take, skip],
     );
-
-    if (isSortByDate === false) {
-      quizbooks.sort((prev, next): number => {
-        return prev.likedCount - next.likedCount;
-      });
-    }
 
     if (!quizbooks.length) {
       throw new NotFoundException('페이지가 존재하지 않습니다.');
@@ -224,21 +221,17 @@ export class QuizBookService {
     return new SolveResultQuizBookDTO(solvedQuizBook);
   }
 
-  //이건 liked 빼는게 어떨지
   async getQuizBookOwnedByUSer(userId: number, isDone: boolean, page: number) {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
 
     const quizBookList = await this.quizBookRepository.query(
-      `select qb.id, qb.title, qb.ownerId, qb.createdAt, qb.ownerName,
-      qb.quizCount, qb.solvedCount, qb.likedCount, 
-      from quizBook as qb join userSolveQuizBook as usq
-      on usq.quizBookId = qb.id
-      where qb.ownerId = ? and usq.completed = ?
-      limit ? offset ?`,
+      `SELECT * FROM quizBook 
+      WHERE ownerId= ? AND completed= ? 
+      LIMIT ? OFFSET ?`,
       [userId, isDone, take, skip],
     );
-
+    console.log(quizBookList);
     const dto = quizBookList.map((entity) => {
       return new QuizBookwithLikedResponseDTO(entity);
     });
@@ -251,13 +244,11 @@ export class QuizBookService {
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
 
     const userSolveQuizBookList = await this.quizBookRepository.query(
-      `select qb.id, qb.title, qb.ownerId, qb.createdAt, qb.ownerName,
-      qb.quizCount, qb.solvedCount, qb.likedCount, 
-      usq.liked 
-      from quizBook as qb join userSolveQuizBook as usq
-      on usq.quizBookId = qb.id
-      where usq.userId = ? and usq.completed = ?
-      limit ? offset ?`,
+      `SELECT qb.*, usq.liked 
+      FROM quizBook AS qb LEFT JOIN userSolveQuizBook usq 
+      ON qb.id=usq.quizBookId
+      WHERE usq.userId = ? AND usq.completed = ?
+      LIMIT ? OFFSET ?`,
       [userId, isDone, take, skip],
     );
 
@@ -281,7 +272,7 @@ export class QuizBookService {
     const unsolvedQuizBookList = await this.userSolveQuizBookRespository.query(
       `SELECT * FROM quizBook WHERE categoryId = ? AND id NOT IN 
         ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ? ) 
-        ORDER BY ${orderOption} DESC limit ? offset ?;
+        ORDER BY ${orderOption} DESC LIMIT ? OFFSET ?;
       `,
       [categoryId, userId, take, skip],
     );
@@ -290,6 +281,10 @@ export class QuizBookService {
       throw new NotFoundException('페이지가 존재하지 않습니다.');
     }
 
-    return unsolvedQuizBookList;
+    const dto = unsolvedQuizBookList.map((entity) => {
+      return new QuizBookwithLikedResponseDTO(entity);
+    });
+
+    return dto;
   }
 }
