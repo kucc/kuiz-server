@@ -261,7 +261,7 @@ export class QuizBookService {
     const orderOption = isSortByDate ? 'id' : 'likedCount';
 
     const unsolvedQuizBookList = await this.userSolveQuizBookRespository.query(
-      `SELECT * FROM quizBook WHERE categoryId = ? AND id NOT IN 
+      `SELECT * FROM quizBook WHERE categoryId = ? AND completed=1 AND id NOT IN 
         ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ? ) 
         ORDER BY ${orderOption} DESC LIMIT ? OFFSET ?;
       `,
@@ -271,7 +271,6 @@ export class QuizBookService {
     if (!unsolvedQuizBookList.length) {
       throw new NotFoundException('페이지가 존재하지 않습니다.');
     }
-
     const dto = unsolvedQuizBookList.map((entity) => {
       return new QuizBookwithLikedResponseDTO(entity);
     });
