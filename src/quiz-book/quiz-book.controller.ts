@@ -60,7 +60,7 @@ export class QuizBookController {
     return quizBookList;
   }
 
-  @Get('my/solving')
+  @Get('solving')
   @UseGuards(new UserGuard())
   async getQuizBookSolvedByUser(
     @Req() request: Request,
@@ -76,7 +76,7 @@ export class QuizBookController {
     return quizBookList;
   }
 
-  @Get('my/owner')
+  @Get('owner')
   @UseGuards(new UserGuard())
   async getQuizBookOwnedByUSer(
     @Req() request: Request,
