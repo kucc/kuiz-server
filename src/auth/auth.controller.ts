@@ -18,15 +18,15 @@ import {
   TOKEN_GRANT_TYPE,
 } from '../common/google-auth-constant';
 import {
-  GoogleUserInfo,
   GoogleAuthQuery,
   GoogleTokenQuery,
   IRequest,
 } from 'src/common/google-auth-interface';
 import { stringify } from 'querystring';
 import { LoginQueryDTO } from './dto/login-query.dto';
-import { SSORequestDTO } from '../user/dto/sso-request.dto';
+import SSORequestDTO from './dto/sso-request.dto';
 import setAccessTokenCookie from 'src/common/lib/set-access-token-cookie';
+import GoogleUserDTO from './dto/google-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -82,11 +82,7 @@ export class AuthController {
         throw new UnauthorizedException('인증 되지 않은 사용자입니다.', error);
       });
 
-    const userInfo: GoogleUserInfo = {
-      email: userResponse.data.email,
-      name: userResponse.data.name,
-    };
-
+    const userInfo = new GoogleUserDTO(userResponse);
     const user = await this.authService.validateUser(userInfo); //new or exist
     const kuizAccessToken = this.authService.createAccessToken(user);
     setAccessTokenCookie(response, kuizAccessToken);
