@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 
 import SSOUserDTO from './dto/sso-user.dto';
 import { UserService } from '../user/user.service';
-import { SSORequestDTO } from '../user/dto/sso-request.dto';
+import SSORequestDTO from './dto/sso-request.dto';
 import { GoogleUserInfo } from 'src/common/google-auth-interface';
 import { UserResponseDTO } from 'src/user/dto/user-response.dto';
 
