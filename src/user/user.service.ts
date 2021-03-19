@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entity/user.entity';
 import { UserResponseDTO } from './dto/user-response.dto';
-import { SSORequestDTO } from './dto/sso-request.dto';
+import SSORequestDTO from '../auth/dto/sso-request.dto';
 import CreateUserRequestDTO from './dto/user-request.dto';
 
 @Injectable()
