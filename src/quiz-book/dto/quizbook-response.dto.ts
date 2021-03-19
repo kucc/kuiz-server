@@ -1,3 +1,5 @@
+import { CategoryEntity } from 'src/entity/category.entity';
+import { QuizEntity } from 'src/entity/quiz.entity';
 import { QuizBookEntity } from '../../entity/quiz-book.entity';
 
 export class QuizBookListResponseDTO {
@@ -6,7 +8,7 @@ export class QuizBookListResponseDTO {
     this.data = quizBooks.map((quizBook) => new QuizBookResponseDTO(quizBook));
   }
   readonly count: number;
-  readonly data: object;
+  readonly data: QuizBookResponseDTO[];
 }
 
 export class QuizBookwithLikedResponseDTO {
@@ -70,4 +72,23 @@ export class LikeQuizBookResponseDTO {
   readonly id: number;
   readonly likedCount: number;
   readonly liked: boolean;
+}
+
+export class QuizBookWithQuizResponseDTO {
+  constructor(quizBook: QuizBookEntity) {
+    this.id = quizBook.id;
+    this.title = quizBook.title;
+    this.ownerId = quizBook.ownerId;
+    this.categoryId = quizBook.categoryId;
+    this.completed = quizBook.completed;
+    this.quiz = quizBook.quizs;
+    this.category = quizBook.category;
+  }
+  readonly id: number;
+  readonly title: string;
+  readonly categoryId: number;
+  readonly ownerId: number;
+  readonly completed: boolean;
+  readonly quiz: QuizEntity[];
+  readonly category: CategoryEntity;
 }
