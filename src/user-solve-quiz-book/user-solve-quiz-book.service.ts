@@ -81,24 +81,29 @@ export class UserSolveQuizBookService {
       userId,
     );
 
-    if (solvedQuizBook.savedQuizId < solvedQuizBookDTO.quizId) {
-      if (solvedQuizBookDTO.isCorrect) {
-        await this.userService.increaseUserPoint(userId, 30);
-        solvedQuizBook.savedCorrectCount += 1;
-      }
-      solvedQuizBook.savedQuizId = solvedQuizBookDTO.quizId;
-    }
+    const quizBook = await this.quizBookRepository.findOne({ id: quizBookId });
 
     const isLastQuiz = await this.checkIsLastQuiz(
       solvedQuizBook.quizBookId,
       solvedQuizBookDTO.quizId,
     );
 
+    if (solvedQuizBook.savedQuizId < solvedQuizBookDTO.quizId) {
+      if (solvedQuizBookDTO.isCorrect) {
+        await this.userService.increaseUserPoint(userId, 30);
+        solvedQuizBook.savedCorrectCount += 1;
+      }
+      if (isLastQuiz) quizBook.solvedCount += 1;
+
+      solvedQuizBook.savedQuizId = solvedQuizBookDTO.quizId;
+    }
+
     if (isLastQuiz) {
       solvedQuizBook.completed = true;
     }
 
     await this.userSolveQuizBookRepository.save(solvedQuizBook);
+    await this.quizBookRepository.save(quizBook);
     return solvedQuizBook;
   }
 }
