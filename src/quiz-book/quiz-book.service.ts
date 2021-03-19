@@ -56,6 +56,7 @@ export class QuizBookService {
     });
     return dto;
   }
+
   async findQuizBookbyId(id: number): Promise<QuizBookEntity> {
     const quizBook = await this.quizBookRepository.findOne({ id });
 
@@ -278,15 +279,13 @@ export class QuizBookService {
     return dto;
   }
 
-  async checkAuthByQuizBookId(
+  async getAuthorizedQuizBook(
     quizBookId: number,
     userId: number,
-  ): Promise<boolean> {
+  ): Promise<QuizBookEntity> {
     const quizBook = await this.findQuizBookbyId(quizBookId);
-    if (quizBook.ownerId !== userId) {
-      throw new UnauthorizedException('권한이 없습니다.');
-    }
+    await this.checkAuthorization(quizBook.ownerId, userId);
 
-    return true;
+    return quizBook;
   }
 }
