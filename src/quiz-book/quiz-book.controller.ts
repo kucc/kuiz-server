@@ -31,6 +31,7 @@ import CreateQuizRequestDTO from 'src/quiz/dto/create-quiz-request.dto';
 import { CreateQuizBookDTO, EditQuizBookDTO } from './dto/quizbook-request.dto';
 import { SolveQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-request.dto';
 import { SolveResultQuizBookDTO } from '../user-solve-quiz-book/dto/user-solve-quiz-book-response.dto';
+import { UserSolveQuizBookEntity } from 'src/entity/user-solve-quiz-book.entity';
 
 @Controller('quiz-book')
 export class QuizBookController {
@@ -49,13 +50,16 @@ export class QuizBookController {
     @Query('categoryId') categoryId: number,
     @Query('page') page: number,
     @Query('keyword') keyword: string,
+    @Query('isSortByDate') isSortByDate: boolean,
   ) {
     const userId = req.user.id;
+
     const quizBookList = await this.quizBookService.searchQuizBookListByKeyword(
       userId,
       categoryId,
       page,
       keyword,
+      isSortByDate,
     );
     return quizBookList;
   }
@@ -92,6 +96,7 @@ export class QuizBookController {
     return quizBookList;
   }
 
+  @UseGuards(new UserGuard())
   @Get(':id/quiz')
   async getQuizBookQuiz(
     @Req() request: Request,
@@ -101,6 +106,21 @@ export class QuizBookController {
     const quizList = await this.quizService.getQuizByQuizBookId(id, userId);
 
     return quizList;
+  }
+
+  @UseGuards(new UserGuard())
+  @Get(':quizBookId/result')
+  async getQuizBookSolveResult(
+    @Req() request: Request,
+    @Param('quizBookId') quizBookId: number,
+  ): Promise<UserSolveQuizBookEntity> {
+    const userId = request.user.id;
+    const quizBookResult = this.quizBookService.getQuizBookSolveResult(
+      userId,
+      quizBookId,
+    );
+
+    return quizBookResult;
   }
 
   @Get('unsolved')

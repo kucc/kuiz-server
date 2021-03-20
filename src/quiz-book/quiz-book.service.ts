@@ -38,9 +38,11 @@ export class QuizBookService {
     categoryId: number,
     page: number,
     keyword: string,
+    isSortByDate: boolean,
   ): Promise<QuizBookwithLikedResponseDTO[]> {
     const take = QUIZBOOKS_PER_PAGE;
     const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+    const orderOption = isSortByDate ? 'qb.id' : 'qb.likedCount';
 
     const quizbookList = await this.quizBookRepository.query(
       `SELECT qb.*, usq.liked,
@@ -48,12 +50,17 @@ export class QuizBookService {
       FROM quizBook qb LEFT JOIN userSolveQuizBook usq 
       ON qb.id=usq.quizBookId AND usq.userId=?
       WHERE qb.completed=1 AND qb.categoryId = ? AND qb.title LIKE '%${keyword}%' 
-      LIMIT ? OFFSET ?`,
+      ORDER BY ${orderOption} DESC LIMIT ? OFFSET ?`,
       [userId, categoryId, take, skip],
     );
+
+    if (page !== 1 && !quizbookList.length) {
+      throw new NotFoundException('페이지가 존재하지 않습니다.');
+    }
     const dto = quizbookList.map((entity) => {
       return new QuizBookwithLikedResponseDTO(entity);
     });
+
     return dto;
   }
   async findQuizBookbyId(id: number): Promise<QuizBookEntity> {
@@ -93,6 +100,18 @@ export class QuizBookService {
       return new QuizBookwithLikedResponseDTO(entity);
     });
     return dtos;
+  }
+
+  async getQuizBookSolveResult(
+    userId: number,
+    quizBookId: number,
+  ): Promise<UserSolveQuizBookEntity> {
+    const quizBookSolveResult = await this.userSolveQuizBookService.getUserSolveQuizBookResult(
+      userId,
+      quizBookId,
+    );
+
+    return quizBookSolveResult;
   }
 
   async checkAuthorization(ownerId: number, userId: number): Promise<boolean> {

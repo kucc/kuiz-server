@@ -17,6 +17,21 @@ export class UserSolveQuizBookService {
     private readonly userService: UserService,
   ) {}
 
+  async getUserSolveQuizBookResult(
+    userId: number,
+    quizBookId: number,
+  ): Promise<UserSolveQuizBookEntity> {
+    const userSolveQuizBook = await this.userSolveQuizBookRepository.findOne({
+      where: {
+        userId,
+        quizBookId,
+      },
+    });
+    if (!userSolveQuizBook) throw new NotFoundException('문제집을 풀어주세요');
+
+    return userSolveQuizBook;
+  }
+
   async findQuizBookByCategory(
     quizBookId: number,
     userId: number,

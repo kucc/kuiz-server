@@ -30,7 +30,6 @@ export class UserController {
   public async getUserInfo(@Req() request: Request): Promise<UserResponseDTO> {
     const { user } = request;
     const userInfo = await this.userService.findUserById(user.id);
-    console.log(userInfo);
     return new UserResponseDTO(userInfo);
   }
 
