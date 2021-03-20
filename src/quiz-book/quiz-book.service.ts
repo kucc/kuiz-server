@@ -54,9 +54,10 @@ export class QuizBookService {
       [userId, categoryId, take, skip],
     );
 
-    if (page !== 1 && !quizbookList.length) {
+    if (page != 1 && !quizbookList.length) {
       throw new NotFoundException('페이지가 존재하지 않습니다.');
     }
+
     const dto = quizbookList.map((entity) => {
       return new QuizBookwithLikedResponseDTO(entity);
     });
