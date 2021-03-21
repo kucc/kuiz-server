@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { getManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   BadRequestException,
@@ -167,22 +167,29 @@ export class QuizBookService {
 
   //좋아요 수 변경
   async updateQuizBookLikes(quizBookId: number, userId: number) {
-    const quizBook = await this.findQuizBookbyId(quizBookId);
-    const isUserLiked = await this.userSolveQuizBookService.toggleQuizBookLikes(
-      quizBookId,
-      userId,
-    );
+    return await getManager()
+      .transaction(async (transactionEntityManager) => {
+        const quizBook = await this.findQuizBookbyId(quizBookId);
+        const isUserLiked = await this.userSolveQuizBookService.toggleQuizBookLikes(
+          quizBookId,
+          userId,
+          transactionEntityManager,
+        );
 
-    if (isUserLiked) {
-      quizBook.likedCount += 1;
-    } else {
-      quizBook.likedCount -= 1;
-    }
-    const updatedQuizBook = await this.quizBookRepository.save(quizBook);
+        if (isUserLiked) {
+          quizBook.likedCount += 1;
+        } else {
+          quizBook.likedCount -= 1;
+        }
+        const updatedQuizBook = await transactionEntityManager.save(quizBook);
 
-    const result = new QuizBookwithLikedResponseDTO(updatedQuizBook);
-    result.liked = isUserLiked;
-    return result;
+        const result = new QuizBookwithLikedResponseDTO(updatedQuizBook);
+        result.liked = isUserLiked;
+        return result;
+      })
+      .catch((error) => {
+        throw error;
+      });
   }
 
   async getQuizBookLikes(quizBookId: number, userId: number) {
