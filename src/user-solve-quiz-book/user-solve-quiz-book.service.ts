@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { SolveQuizBookDTO } from './dto/user-solve-quiz-book-request.dto';
@@ -62,9 +62,10 @@ export class UserSolveQuizBookService {
     );
 
     if (!solvedQuizBook || !solvedQuizBook.completed) {
-      throw new NotFoundException(
-        '문제집을 다 풀어야 좋아요를 누를 수 있습니다.',
-      );
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: '문제집을 다 풀어야 좋아요를 누를 수 있습니다.',
+      }, HttpStatus.FORBIDDEN);
     }
 
     solvedQuizBook.liked = !solvedQuizBook.liked;
