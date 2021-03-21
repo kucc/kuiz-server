@@ -18,8 +18,8 @@ import { Request } from 'express';
 
 import {
   QuizBookResponseDTO,
-  EditQuizBookResponseDTO,
   LikeQuizBookResponseDTO,
+  QuizBookWithQuizResponseDTO,
 } from './dto/quizbook-response.dto';
 import { QuizService } from 'src/quiz/quiz.service';
 import { QuizBookService } from './quiz-book.service';
@@ -98,14 +98,16 @@ export class QuizBookController {
 
   @UseGuards(new UserGuard())
   @Get(':id/quiz')
-  async getQuizBookQuiz(
+  async getQuizBookwithSolvingQuiz(
     @Req() request: Request,
-    @Param('id') id: number,
+    @Param('id') quizBookId: number,
   ): Promise<QuizResponseDTO[]> {
     const userId = request.user.id;
-    const quizList = await this.quizService.getQuizByQuizBookId(id, userId);
 
-    return quizList;
+    return await this.quizService.getSolvingQuizByQuizBookId(
+      quizBookId,
+      userId,
+    );
   }
 
   @UseGuards(new UserGuard())
@@ -245,13 +247,30 @@ export class QuizBookController {
     return await this.quizBookService.getQuizBookLikes(quizBookId, userId);
   }
 
+  @Get('/:quizBookId')
+  async getQuizBookwithQuizList(
+    @Req() request: Request,
+    @Param('quizBookId') quizBookId: number,
+  ): Promise<QuizBookWithQuizResponseDTO> {
+    const userId = request.user.id;
+
+    const quizBook = await this.quizBookService.getAuthorizedQuizBook(
+      quizBookId,
+      userId,
+    );
+    const quizList = await this.quizService.getAllQuizByQuizBookId(quizBookId);
+    quizBook.quizs = quizList;
+
+    return new QuizBookWithQuizResponseDTO(quizBook);
+  }
+
   @Patch(':quizBookId')
   @UseGuards(new MemberGuard())
-  async editQuizBookInfo(
+  async editQuizBook(
     @Req() request: Request,
     @Param('quizBookId') quizBookId: number,
     @Body() quizBookDTO: EditQuizBookDTO,
-  ): Promise<EditQuizBookResponseDTO> {
+  ): Promise<QuizBookWithQuizResponseDTO> {
     const userId = request.user.id;
     const editedQuizBook = await this.quizBookService.editQuizBook(
       quizBookId,
@@ -259,16 +278,19 @@ export class QuizBookController {
       userId,
     );
 
-    return new EditQuizBookResponseDTO(editedQuizBook);
+    const quizList = await this.quizService.getAllQuizByQuizBookId(quizBookId);
+    editedQuizBook.quizs = quizList;
+
+    return new QuizBookWithQuizResponseDTO(editedQuizBook);
   }
 
-  @Get('/:quizBookId/authorize')
-  async checkQuizBookAuthByQuizBookId(
-    @Req() request: Request,
-    @Param('quizBookId') quizBookId: number,
-  ): Promise<boolean> {
-    const userId = request.user.id;
+  // @Get('/:quizBookId/authorize')
+  // async checkQuizBookAuthByQuizBookId(
+  //   @Req() request: Request,
+  //   @Param('quizBookId') quizBookId: number,
+  // ): Promise<boolean> {
+  //   const userId = request.user.id;
 
-    return await this.quizBookService.checkAuthByQuizBookId(quizBookId, userId);
-  }
+  //   return await this.quizBookService.checkAuthByQuizBookId(quizBookId, userId);
+  // }
 }

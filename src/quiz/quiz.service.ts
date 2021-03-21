@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuizEntity } from 'src/entity/quiz.entity';
@@ -27,17 +26,16 @@ export class QuizService {
     return quiz;
   }
 
-  async findAllByQuizBookId(quizBookId: number): Promise<QuizEntity[]> {
-    const quizzes = await this.QuizRepository.find({ quizBookId });
-
-    if (!quizzes) {
+  async getAllQuizByQuizBookId(quizBookId: number): Promise<QuizEntity[]> {
+    const quizList = await this.QuizRepository.find({ quizBookId });
+    if (!quizList) {
       throw new NotFoundException('문제가 존재하지 않습니다.');
     }
 
-    return quizzes;
+    return quizList;
   }
 
-  async getQuizByQuizBookId(
+  async getSolvingQuizByQuizBookId(
     quizBookId: number,
     userId: number,
   ): Promise<QuizEntity[]> {
@@ -48,6 +46,7 @@ export class QuizService {
     );
 
     const totalQuizList = await this.QuizRepository.find({ quizBookId });
+    if (!isSolving.length) return totalQuizList;
 
     const unsolvedQuizList = await this.QuizRepository.query(
       `SELECT * FROM quiz 
@@ -56,8 +55,7 @@ export class QuizService {
       [quizBookId, userId, quizBookId],
     );
 
-    if (!isSolving.length) return totalQuizList;
-    else return unsolvedQuizList;
+    return unsolvedQuizList;
   }
 
   async findByIdAndCheckOwner(id: number, userId: number): Promise<QuizEntity> {
