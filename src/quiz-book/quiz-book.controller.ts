@@ -50,18 +50,29 @@ export class QuizBookController {
     @Query('categoryId') categoryId: number,
     @Query('page') page: number,
     @Query('keyword') keyword: string,
-    @Query('isSortByDate') isSortByDate: boolean,
+    @Query('isSortByDate') isSortByDate: string,
+    @Query('isUnSolved') isUnSolved: string,
   ) {
     const userId = req.user.id;
-
-    const quizBookList = await this.quizBookService.searchQuizBookListByKeyword(
-      userId,
-      categoryId,
-      page,
-      keyword,
-      isSortByDate,
-    );
-    return quizBookList;
+    if (isUnSolved === 'true') {
+      const quizBookList = await this.quizBookService.getQuizBookListByKeyword(
+        userId,
+        categoryId,
+        page,
+        keyword,
+        isSortByDate === 'true',
+      );
+      return quizBookList;
+    } else {
+      const quizBookList = await this.quizBookService.getUnSolvedQuizBookListByKeyword(
+        userId,
+        categoryId,
+        page,
+        keyword,
+        isSortByDate == 'true',
+      );
+      return quizBookList;
+    }
   }
 
   @Get('solving')

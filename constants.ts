@@ -1,1 +1,1 @@
-export const QUIZBOOKS_PER_PAGE = 8;
+export const QUIZBOOKS_PER_PAGE = 10;

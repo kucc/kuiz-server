@@ -33,7 +33,7 @@ export class QuizBookService {
     private readonly userService: UserService,
   ) {}
 
-  async searchQuizBookListByKeyword(
+  async getQuizBookListByKeyword(
     userId: number,
     categoryId: number,
     page: number,
@@ -52,6 +52,36 @@ export class QuizBookService {
       WHERE qb.completed=1 AND qb.categoryId = ? AND qb.title LIKE '%${keyword}%' 
       ORDER BY ${orderOption} DESC LIMIT ? OFFSET ?`,
       [userId, categoryId, take, skip],
+    );
+
+    if (page != 1 && !quizbookList.length) {
+      throw new NotFoundException('페이지가 존재하지 않습니다.');
+    }
+
+    const dto = quizbookList.map((entity) => {
+      return new QuizBookwithLikedResponseDTO(entity);
+    });
+
+    return dto;
+  }
+
+  async getUnSolvedQuizBookListByKeyword(
+    userId: number,
+    categoryId: number,
+    page: number,
+    keyword: string,
+    isSortByDate: boolean,
+  ) {
+    const take = QUIZBOOKS_PER_PAGE;
+    const skip = (page - 1) * QUIZBOOKS_PER_PAGE;
+    const orderOption = isSortByDate ? 'id' : 'likedCount';
+
+    const quizbookList = await this.quizBookRepository.query(
+      `SELECT * FROM quizBook WHERE categoryId = ? AND completed = 1 AND title LIKE '%${keyword}%'
+      AND id NOT IN ( SELECT quizBookId FROM userSolveQuizBook WHERE userId = ?)
+       ORDER BY ${orderOption} DESC LIMIT ? OFFSET ?;
+      `,
+      [categoryId, userId, take, skip],
     );
 
     if (page != 1 && !quizbookList.length) {
