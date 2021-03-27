@@ -18,6 +18,7 @@ import { UserSolveQuizBookEntity } from 'src/entity/user-solve-quiz-book.entity'
 import {
   LikeQuizBookResponseDTO,
   QuizBookwithLikedResponseDTO,
+  SolvingQuizBookWithQuizResponseDTO,
 } from './dto/quizbook-response.dto';
 
 @Injectable()
@@ -344,5 +345,25 @@ export class QuizBookService {
     await this.checkAuthorization(quizBook.ownerId, userId);
 
     return quizBook;
+  }
+
+  async getSolvingQuizBook(
+    quizBookId: number,
+    userId: number,
+  ): Promise<SolvingQuizBookWithQuizResponseDTO> {
+    const quizBook = await this.quizBookRepository.query(
+      `
+      SELECT qb.*, usqb.savedCorrectCount, usqb.completed as allSolved
+      FROM quizBook as qb  LEFT JOIN userSolveQuizBook as usqb
+      ON qb.id = usqb.quizBookId AND usqb.userId =? 
+      WHERE qb.id = ?;
+    `,
+      [userId, quizBookId],
+    );
+
+    return new SolvingQuizBookWithQuizResponseDTO(
+      quizBook[0],
+      quizBook[0].allSolved,
+    );
   }
 }
