@@ -138,7 +138,7 @@ export class UserSolveQuizBookService {
         solvedQuizBook.savedCorrectCount += 1;
       }
       if (isLastQuiz) quizBook.solvedCount += 1;
-
+      solvedQuizBook.updatedAt = new Date();
       solvedQuizBook.savedQuizId = solvedQuizBookDTO.quizId;
     }
 
