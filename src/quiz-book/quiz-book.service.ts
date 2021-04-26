@@ -264,6 +264,8 @@ export class QuizBookService {
       .catch(() => {
         throw new BadRequestException('잘못된 요청입니다.');
       });
+
+    await this.syncQuizBookUpdatedAt(quizBookId);
   }
 
   async solveQuizBook(
@@ -365,5 +367,11 @@ export class QuizBookService {
       quizBook[0],
       quizBook[0].allSolved,
     );
+  }
+
+  async syncQuizBookUpdatedAt(quizBookId: number) {
+    const quizBook = await this.quizBookRepository.findOne({ id: quizBookId });
+    quizBook.updatedAt = new Date();
+    await this.quizBookRepository.save(quizBook);
   }
 }
