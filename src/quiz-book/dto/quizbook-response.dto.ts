@@ -92,3 +92,18 @@ export class QuizBookWithQuizResponseDTO {
   readonly quiz: QuizEntity[];
   readonly category: CategoryEntity;
 }
+
+export class SolvingQuizBookWithQuizResponseDTO {
+  constructor(quizBook: any, allSolved?: boolean) {
+    this.id = quizBook.id;
+    this.quizCount = quizBook.quizCount;
+    this.savedCorrectCount = quizBook.savedCorrectCount;
+    this.allSolved = allSolved;
+    this.quiz = quizBook.quiz;
+  }
+  readonly id: number;
+  readonly quizCount: number;
+  allSolved: boolean;
+  savedCorrectCount: number | null;
+  quiz: QuizEntity[];
+}

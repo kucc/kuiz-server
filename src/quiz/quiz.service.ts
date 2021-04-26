@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuizEntity } from 'src/entity/quiz.entity';
+import { SolvingQuizBookWithQuizResponseDTO } from 'src/quiz-book/dto/quizbook-response.dto';
 import { QuizBookService } from 'src/quiz-book/quiz-book.service';
 import { Repository } from 'typeorm';
 import CreateQuizRequestDTO from './dto/create-quiz-request.dto';
@@ -35,19 +36,10 @@ export class QuizService {
     return quizList;
   }
 
-  async getSolvingQuizByQuizBookId(
+  async getUnsolvedQuizByQuizBookId(
     quizBookId: number,
     userId: number,
   ): Promise<QuizEntity[]> {
-    const isSolving = await this.QuizRepository.query(
-      `SELECT * FROM userSolveQuizBook 
-       WHERE userId = ? AND quizBookId = ? AND completed = false;`,
-      [userId, quizBookId],
-    );
-
-    const totalQuizList = await this.QuizRepository.find({ quizBookId });
-    if (!isSolving.length) return totalQuizList;
-
     const unsolvedQuizList = await this.QuizRepository.query(
       `SELECT * FROM quiz 
        WHERE quizBookId = ? 
@@ -103,5 +95,28 @@ export class QuizService {
     await this.quizBookService.decreaseQuizCount(quiz.quizBookId);
 
     return { result: true };
+  }
+
+  async getSolvingQuizBookwithQuiz(
+    quizBookId: number,
+    userId: number,
+  ): Promise<SolvingQuizBookWithQuizResponseDTO> {
+    const quizBook = await this.quizBookService.getSolvingQuizBook(
+      quizBookId,
+      userId,
+    );
+
+    if (quizBook.savedCorrectCount == null || quizBook.allSolved) {
+      const quizList = await this.QuizRepository.find({ quizBookId });
+      quizBook.quiz = quizList;
+    } else {
+      const quizList = await this.getUnsolvedQuizByQuizBookId(
+        quizBookId,
+        userId,
+      );
+      quizBook.quiz = quizList;
+    }
+
+    return quizBook;
   }
 }

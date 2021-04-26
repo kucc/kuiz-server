@@ -20,6 +20,7 @@ import {
   QuizBookResponseDTO,
   LikeQuizBookResponseDTO,
   QuizBookWithQuizResponseDTO,
+  SolvingQuizBookWithQuizResponseDTO,
 } from './dto/quizbook-response.dto';
 import { QuizService } from 'src/quiz/quiz.service';
 import { QuizBookService } from './quiz-book.service';
@@ -112,13 +113,14 @@ export class QuizBookController {
   async getQuizBookwithSolvingQuiz(
     @Req() request: Request,
     @Param('id') quizBookId: number,
-  ): Promise<QuizResponseDTO[]> {
+  ): Promise<SolvingQuizBookWithQuizResponseDTO> {
     const userId = request.user.id;
-
-    return await this.quizService.getSolvingQuizByQuizBookId(
+    const quizBookWithQuiz = await this.quizService.getSolvingQuizBookwithQuiz(
       quizBookId,
       userId,
     );
+
+    return quizBookWithQuiz;
   }
 
   @UseGuards(new UserGuard())
@@ -259,7 +261,7 @@ export class QuizBookController {
   }
 
   @Get('/:quizBookId')
-  async getQuizBookwithQuizList(
+  async getAuthQuizBookwithQuizList(
     @Req() request: Request,
     @Param('quizBookId') quizBookId: number,
   ): Promise<QuizBookWithQuizResponseDTO> {
@@ -294,14 +296,4 @@ export class QuizBookController {
 
     return new QuizBookWithQuizResponseDTO(editedQuizBook);
   }
-
-  // @Get('/:quizBookId/authorize')
-  // async checkQuizBookAuthByQuizBookId(
-  //   @Req() request: Request,
-  //   @Param('quizBookId') quizBookId: number,
-  // ): Promise<boolean> {
-  //   const userId = request.user.id;
-
-  //   return await this.quizBookService.checkAuthByQuizBookId(quizBookId, userId);
-  // }
 }
