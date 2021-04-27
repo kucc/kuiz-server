@@ -68,7 +68,10 @@ export class QuizService {
       );
     });
     await this.quizBookService.increaseQuizCount(newQuiz.quizBookId);
-
+    await this.quizBookService.updateAddedLastQuizid(
+      newQuiz.quizBookId,
+      newQuiz.id,
+    );
     return newQuiz;
   }
 
@@ -93,6 +96,10 @@ export class QuizService {
       throw new BadRequestException('잘못된 요청입니다.');
     });
     await this.quizBookService.decreaseQuizCount(quiz.quizBookId);
+    await this.quizBookService.updateDeletedLastQuizid(
+      quiz.quizBookId,
+      quiz.id,
+    );
 
     return { result: true };
   }

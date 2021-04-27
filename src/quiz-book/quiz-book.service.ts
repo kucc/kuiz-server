@@ -268,6 +268,28 @@ export class QuizBookService {
     await this.syncQuizBookUpdatedAt(quizBookId);
   }
 
+  async updateAddedLastQuizid(quizBookId: number, newQuizId: number) {
+    try {
+      await this.quizBookRepository.query(
+        'UPDATE quizBook SET lastQuizId = ? where id = ?',
+        [newQuizId, quizBookId],
+      );
+    } catch {
+      throw new BadRequestException('잘못된 요청입니다.');
+    }
+  }
+
+  async updateDeletedLastQuizid(quizBookId: number, deletedQuizId: number) {
+    const quizBook = await this.quizBookRepository.findOne({ id: quizBookId });
+
+    if (quizBook.lastQuizId === deletedQuizId)
+      await this.quizBookRepository.query(
+        `UPDATE quizBook SET lastQuizId = 
+        (SELECT id FROM quiz WHERE quizBookId = ? ORDER BY id DESC LIMIT 1 )`,
+        [quizBookId],
+      );
+  }
+
   async solveQuizBook(
     quizBookId: number,
     userId: number,
