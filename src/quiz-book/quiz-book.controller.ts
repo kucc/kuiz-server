@@ -20,7 +20,7 @@ import {
   QuizBookResponseDTO,
   LikeQuizBookResponseDTO,
   QuizBookWithQuizResponseDTO,
-  SolvingQuizBookWithQuizResponseDTO,
+  QuizBookWithSolvingQuizResponseDTO,
 } from './dto/quizbook-response.dto';
 import { QuizService } from 'src/quiz/quiz.service';
 import { QuizBookService } from './quiz-book.service';
@@ -113,7 +113,7 @@ export class QuizBookController {
   async getQuizBookwithSolvingQuiz(
     @Req() request: Request,
     @Param('id') quizBookId: number,
-  ): Promise<SolvingQuizBookWithQuizResponseDTO> {
+  ): Promise<QuizBookWithSolvingQuizResponseDTO> {
     const userId = request.user.id;
     const quizBookWithQuiz = await this.quizService.getSolvingQuizBookwithQuiz(
       quizBookId,

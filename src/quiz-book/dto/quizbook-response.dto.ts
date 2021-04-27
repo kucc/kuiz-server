@@ -93,17 +93,25 @@ export class QuizBookWithQuizResponseDTO {
   readonly category: CategoryEntity;
 }
 
-export class SolvingQuizBookWithQuizResponseDTO {
-  constructor(quizBook: any, allSolved?: boolean) {
+export class QuizBookWithSolvingQuizResponseDTO {
+  constructor(quizBook: any) {
     this.id = quizBook.id;
     this.quizCount = quizBook.quizCount;
+    this.lastQuizId = quizBook.lastQuizId;
     this.savedCorrectCount = quizBook.savedCorrectCount;
-    this.allSolved = allSolved;
+    this.savedQuizId = quizBook.savedQuizId;
+    this.allSolved = quizBook.allSolved;
+    this.updatedAt = quizBook.updatedAt;
+    this.solvedAt = quizBook.solvedAt;
     this.quiz = quizBook.quiz;
   }
   readonly id: number;
   readonly quizCount: number;
-  allSolved: boolean;
-  savedCorrectCount: number | null;
+  readonly lastQuizId: number;
+  readonly savedCorrectCount: number | null;
+  readonly savedQuizId: number;
+  readonly allSolved: boolean;
+  readonly updatedAt: Date;
+  readonly solvedAt: Date;
   quiz: QuizEntity[];
 }
