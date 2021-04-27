@@ -33,6 +33,9 @@ export class QuizBookEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
   @Column({ type: 'int', default: 0 })
   likedCount: number;
 

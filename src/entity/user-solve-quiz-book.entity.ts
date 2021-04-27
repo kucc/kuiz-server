@@ -32,6 +32,9 @@ export class UserSolveQuizBookEntity {
   @Column({ type: 'int', nullable: false })
   quizBookId: number;
 
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
   @ManyToOne((type) => UserEntity, (user) => user.solves, { nullable: false })
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: UserEntity;
