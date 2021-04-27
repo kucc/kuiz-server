@@ -1,9 +1,4 @@
-import {
-  EntityManager,
-  getManager,
-  Repository,
-  TransactionManager,
-} from 'typeorm';
+import { EntityManager, Repository, TransactionManager } from 'typeorm';
 import {
   HttpException,
   HttpStatus,
@@ -16,6 +11,7 @@ import { SolveQuizBookDTO } from './dto/user-solve-quiz-book-request.dto';
 import { UserSolveQuizBookEntity } from '../entity/user-solve-quiz-book.entity';
 import { QuizBookEntity } from 'src/entity/quiz-book.entity';
 import { UserService } from 'src/user/user.service';
+import { SolveResultQuizBookDTO } from './dto/user-solve-quiz-book-response.dto';
 
 @Injectable()
 export class UserSolveQuizBookService {
@@ -119,35 +115,59 @@ export class UserSolveQuizBookService {
     quizBookId: number,
     userId: number,
     solvedQuizBookDTO: SolveQuizBookDTO,
-  ): Promise<UserSolveQuizBookEntity> {
-    const solvedQuizBook = await this.findandCreatebyQBIdandUserId(
+  ): Promise<SolveResultQuizBookDTO> {
+    const quizBookSolve = await this.findandCreatebyQBIdandUserId(
       quizBookId,
       userId,
     );
 
-    const quizBook = await this.quizBookRepository.findOne({ id: quizBookId });
-
     const isLastQuiz = await this.checkIsLastQuiz(
-      solvedQuizBook.quizBookId,
+      quizBookSolve.quizBookId,
       solvedQuizBookDTO.quizId,
     );
 
-    if (solvedQuizBook.savedQuizId < solvedQuizBookDTO.quizId) {
-      if (solvedQuizBookDTO.isCorrect) {
-        await this.userService.increaseUserPoint(userId, 30);
-        solvedQuizBook.savedCorrectCount += 1;
-      }
-      if (isLastQuiz) quizBook.solvedCount += 1;
-      solvedQuizBook.updatedAt = new Date();
-      solvedQuizBook.savedQuizId = solvedQuizBookDTO.quizId;
-    }
-
+    quizBookSolve.updatedAt = new Date();
     if (isLastQuiz) {
-      solvedQuizBook.completed = true;
+      quizBookSolve.completed = true;
     }
 
-    await this.userSolveQuizBookRepository.save(solvedQuizBook);
+    // 해당 문제를 이미 푼 사람인 경우
+    if (quizBookSolve.savedQuizId >= solvedQuizBookDTO.quizId) {
+      await this.userSolveQuizBookRepository.save(quizBookSolve);
+      return new SolveResultQuizBookDTO(quizBookSolve);
+    }
+
+    // 해당 문제를 처음 푼 사람 인 경우
+    return this.solveNewQuizBook(
+      quizBookSolve,
+      quizBookId,
+      userId,
+      solvedQuizBookDTO,
+    );
+  }
+
+  async solveNewQuizBook(
+    quizBookSolve: UserSolveQuizBookEntity,
+    quizBookId: number,
+    userId: number,
+    solvedQuizBookDTO: SolveQuizBookDTO,
+  ): Promise<SolveResultQuizBookDTO> {
+    const quizBook = await this.quizBookRepository.findOne({ id: quizBookId });
+    let point = 0;
+
+    if (!quizBookSolve.savedQuizId) quizBook.solvedCount += 1; // 해당 문제집 처음 푸는 사용자인 경우, 문제집의 solvedCount+
+
+    quizBookSolve.savedQuizId = solvedQuizBookDTO.quizId;
+
+    if (solvedQuizBookDTO.isCorrect) {
+      await this.userService.increaseUserPoint(userId, 30);
+      quizBookSolve.savedCorrectCount += 1;
+      point = 30;
+    }
+
+    await this.userSolveQuizBookRepository.save(quizBookSolve);
     await this.quizBookRepository.save(quizBook);
-    return solvedQuizBook;
+
+    return new SolveResultQuizBookDTO(quizBookSolve, point);
   }
 }
