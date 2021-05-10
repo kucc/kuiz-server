@@ -18,7 +18,7 @@ import { UserSolveQuizBookEntity } from 'src/entity/user-solve-quiz-book.entity'
 import {
   LikeQuizBookResponseDTO,
   QuizBookwithLikedResponseDTO,
-  SolvingQuizBookWithQuizResponseDTO,
+  QuizBookWithSolvingQuizResponseDTO,
 } from './dto/quizbook-response.dto';
 
 @Injectable()
@@ -268,18 +268,40 @@ export class QuizBookService {
     await this.syncQuizBookUpdatedAt(quizBookId);
   }
 
+  async updateAddedLastQuizid(quizBookId: number, newQuizId: number) {
+    try {
+      await this.quizBookRepository.query(
+        'UPDATE quizBook SET lastQuizId = ? where id = ?',
+        [newQuizId, quizBookId],
+      );
+    } catch {
+      throw new BadRequestException('잘못된 요청입니다.');
+    }
+  }
+
+  async updateDeletedLastQuizid(quizBookId: number, deletedQuizId: number) {
+    const quizBook = await this.quizBookRepository.findOne({ id: quizBookId });
+
+    if (quizBook.lastQuizId === deletedQuizId)
+      await this.quizBookRepository.query(
+        `UPDATE quizBook SET lastQuizId = 
+        (SELECT id FROM quiz WHERE quizBookId = ? ORDER BY id DESC LIMIT 1 )`,
+        [quizBookId],
+      );
+  }
+
   async solveQuizBook(
     quizBookId: number,
     userId: number,
     solveQuizBookDTO: SolveQuizBookDTO,
   ): Promise<SolveResultQuizBookDTO> {
-    const solvedQuizBook = await this.userSolveQuizBookService.solveQuizBook(
+    const solvedQuizBookResult = await this.userSolveQuizBookService.solveQuizBook(
       quizBookId,
       userId,
       solveQuizBookDTO,
     );
 
-    return new SolveResultQuizBookDTO(solvedQuizBook);
+    return solvedQuizBookResult;
   }
 
   async getQuizBookOwnedByUSer(userId: number, isDone: boolean) {
@@ -352,21 +374,19 @@ export class QuizBookService {
   async getSolvingQuizBook(
     quizBookId: number,
     userId: number,
-  ): Promise<SolvingQuizBookWithQuizResponseDTO> {
+  ): Promise<QuizBookWithSolvingQuizResponseDTO> {
     const quizBook = await this.quizBookRepository.query(
       `
-      SELECT qb.*, usqb.savedCorrectCount, usqb.completed as allSolved
-      FROM quizBook as qb  LEFT JOIN userSolveQuizBook as usqb
+      SELECT qb.id, qb.quizCount, qb.lastQuizId, qb.updatedAt,
+      usqb.savedCorrectCount, usqb.savedQuizId, usqb.completed as allSolved, usqb.updatedAt as solvedAt
+      FROM quizBook as qb LEFT JOIN userSolveQuizBook as usqb
       ON qb.id = usqb.quizBookId AND usqb.userId =? 
       WHERE qb.id = ?;
     `,
       [userId, quizBookId],
     );
 
-    return new SolvingQuizBookWithQuizResponseDTO(
-      quizBook[0],
-      quizBook[0].allSolved,
-    );
+    return new QuizBookWithSolvingQuizResponseDTO(quizBook[0]);
   }
 
   async syncQuizBookUpdatedAt(quizBookId: number) {

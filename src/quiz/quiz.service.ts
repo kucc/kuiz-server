@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuizEntity } from 'src/entity/quiz.entity';
-import { SolvingQuizBookWithQuizResponseDTO } from 'src/quiz-book/dto/quizbook-response.dto';
+import { QuizBookWithSolvingQuizResponseDTO } from 'src/quiz-book/dto/quizbook-response.dto';
 import { QuizBookService } from 'src/quiz-book/quiz-book.service';
 import { Repository } from 'typeorm';
 import CreateQuizRequestDTO from './dto/create-quiz-request.dto';
@@ -68,7 +68,10 @@ export class QuizService {
       );
     });
     await this.quizBookService.increaseQuizCount(newQuiz.quizBookId);
-
+    await this.quizBookService.updateAddedLastQuizid(
+      newQuiz.quizBookId,
+      newQuiz.id,
+    );
     return newQuiz;
   }
 
@@ -93,6 +96,10 @@ export class QuizService {
       throw new BadRequestException('잘못된 요청입니다.');
     });
     await this.quizBookService.decreaseQuizCount(quiz.quizBookId);
+    await this.quizBookService.updateDeletedLastQuizid(
+      quiz.quizBookId,
+      quiz.id,
+    );
 
     return { result: true };
   }
@@ -100,23 +107,32 @@ export class QuizService {
   async getSolvingQuizBookwithQuiz(
     quizBookId: number,
     userId: number,
-  ): Promise<SolvingQuizBookWithQuizResponseDTO> {
-    const quizBook = await this.quizBookService.getSolvingQuizBook(
+  ): Promise<QuizBookWithSolvingQuizResponseDTO> {
+    const solvingQuizBook = await this.quizBookService.getSolvingQuizBook(
       quizBookId,
       userId,
     );
 
-    if (quizBook.savedCorrectCount == null || quizBook.allSolved) {
-      const quizList = await this.QuizRepository.find({ quizBookId });
-      quizBook.quiz = quizList;
-    } else {
-      const quizList = await this.getUnsolvedQuizByQuizBookId(
-        quizBookId,
-        userId,
-      );
-      quizBook.quiz = quizList;
+    const unSolvedQuizList = await this.getUnsolvedQuizByQuizBookId(
+      quizBookId,
+      userId,
+    );
+
+    /*
+    처음 부터 시작하는 경우
+    1. 해당 문제집을 처음 푸는 경우 / 다푼 경우
+    2. 사용자가 푼 이후에 수정된 문제집일경우  qb의 updatedAt > solvedAt
+    */
+    if (
+      !unSolvedQuizList.length ||
+      solvingQuizBook.updatedAt > solvingQuizBook.solvedAt
+    ) {
+      const totalQuizList = await this.QuizRepository.find({ quizBookId });
+      solvingQuizBook.quiz = totalQuizList;
+      return solvingQuizBook;
     }
 
-    return quizBook;
+    solvingQuizBook.quiz = unSolvedQuizList;
+    return solvingQuizBook;
   }
 }
